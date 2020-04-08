@@ -17,8 +17,8 @@ __all__ = ['Modu']
 
 class Modu(object):
     ''' low level api for backend '''
-    def __init__(self, graphdef, root=MODU_ROOT):
-        self._graphdict = {node.name: node for node in graphdef.node}
+    def __init__(self, graphdict, root=MODU_ROOT):
+        self._graphdict = graphdict
 
         # initialize modules with root module
         self._root = root
@@ -49,7 +49,7 @@ class Modu(object):
 
     def to_mod_proto(self, module):
         ''' exports specified module to protobuf format
-        
+
             module   (str)  : full module name to convert to protobuf format
         '''
         # helper function

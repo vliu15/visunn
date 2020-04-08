@@ -3,7 +3,7 @@
  * @author Vincent Liu
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dom } from 'react-three-fiber';
 
 
@@ -16,8 +16,15 @@ const Text = (props) => {
 }
 
 const Node = (props) => {
-    const url = 'http://localhost:3000/topology/' + props.tag.replace(/\//g, ';').slice(0, -1)
-    const [hover, setHover] = useState(false);
+    let [hover, setHover] = useState(false);
+    let [active, setActive] = useState(false);
+    let tag = props.tag.replace(/\//g, ';').slice(0, -1);
+
+    useEffect(() => {
+        props.tagHandler(tag);
+        setActive(false);
+    }, [active]);
+
     return (
         <>
             <Text text={hover ? props.tag : ''} x={props.x} y={props.y} />
@@ -25,7 +32,8 @@ const Node = (props) => {
                 position={[props.x, props.y, 0]}
                 rotation={[0, 0, 0]}
                 receiveShadow={true}
-                onClick={props.isModule ? (e) => window.location.href = url : (e) => {}}
+                // onClick={props.isModule ? () => props.tagHandler(tag) : () => {}}
+                onClick={props.isModule ? () => setActive(true) : () => {}}
                 onPointerOver={() => setHover(true)}
                 onPointerOut={() => setHover(false)}>
                 <boxGeometry
@@ -49,7 +57,8 @@ const Nodes = (props) => {
                 isModule={node.slice(-1) === '/'}
                 x={props.coords[node][0]}
                 y={props.coords[node][1]}
-                tag={'root/' + node} />
+                tag={'root/' + node} 
+                tagHandler={props.tagHandler} />
     );
     return nodes;
 }
