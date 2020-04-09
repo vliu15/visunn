@@ -4,13 +4,12 @@
 
 import os
 import pickle
-from pprint import pprint
 import networkx as nx
 import matplotlib.pyplot as plt
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from constants import LOG_DIR, MODU_FILE, MODU_ROOT
-from visuai.util import link_outputs, prune_nodes, build_modu
+from visuai.util import prune_nodes, prune_modules, build_modu
 from visuai.plot import plot
 from visuai.modu import Modu
 
@@ -68,14 +67,19 @@ class Visu(object):
         # #####################################################################
         graphdict = prune_nodes(graphdict)
 
+        # [3] prune irrelevant modules that don't contribute to the hierarchy
+        # #####################################################################
+        # some modules only contain one submodule or one node, and such modules
+        # are uninteresting and only complicate the hierarchical structure of
+        # topology, so we collapse all modules that fall into this category
+        graphdict = prune_modules(graphdict)
+
         # [3] modularize pruned graph topology as a filesystem
         # #####################################################################
         # we want to retain the modularity of the topology so that it will be
         # easy to interact with and represent as a web app
         # #####################################################################
         self._modu = build_modu(graphdict)
-        pprint(self._modu._modules)
-        raise RuntimeError
 
         # [4] log it for later access
         if logdir == '':

@@ -6,6 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { Dom } from 'react-three-fiber';
 
+import { MODULE_COLOR, MODULE_HOVER_COLOR, NODE_COLOR } from '../constants';
+
 
 const Text = (props) => {
     return (
@@ -17,13 +19,9 @@ const Text = (props) => {
 
 const Node = (props) => {
     let [hover, setHover] = useState(false);
-    let [active, setActive] = useState(false);
     let tag = props.tag.replace(/\//g, ';').slice(0, -1);
-
-    useEffect(() => {
-        props.tagHandler(tag);
-        setActive(false);
-    }, [active]);
+    let baseColor = props.isModule ? MODULE_COLOR : NODE_COLOR;
+    let hoverColor = props.isModule ? MODULE_HOVER_COLOR : NODE_COLOR;
 
     return (
         <>
@@ -32,8 +30,7 @@ const Node = (props) => {
                 position={[props.x, props.y, 0]}
                 rotation={[0, 0, 0]}
                 receiveShadow={true}
-                // onClick={props.isModule ? () => props.tagHandler(tag) : () => {}}
-                onClick={props.isModule ? () => setActive(true) : () => {}}
+                onClick={props.isModule ? () => props.tagHandler(tag) : () => {}}
                 onPointerOver={() => setHover(true)}
                 onPointerOut={() => setHover(false)}>
                 <boxGeometry
@@ -42,7 +39,7 @@ const Node = (props) => {
                     key={'geo'} />
                 <meshLambertMaterial
                     attach='material'
-                    color={hover ? 0x00cec9 : 0x6c5ce7}
+                    color={hover ? hoverColor : baseColor}
                     key={'mat'} />
             </mesh>
         </>

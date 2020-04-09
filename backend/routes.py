@@ -3,7 +3,9 @@
 ''' contains blueprint routing for flask app '''
 
 from copy import deepcopy
+from pprint import pprint
 from flask import Blueprint, jsonify
+from google.protobuf.json_format import MessageToDict
 
 from visuai.plot import plot
 
@@ -44,11 +46,15 @@ def get_topology(module, modu):
     # #####################################################################
     proto = modu.to_mod_proto(module)
 
-    # [2] get node positions (mapping, name:{x,y})
+    # [2] create mapping from node to nodedef (json compatible)
+    # #####################################################################
+    meta = {node.name: MessageToDict(node) for node in proto.node}
+
+    # [3] get node positions (mapping, name:{x,y})
     # #####################################################################
     _, coords = plot(proto, normalize=True, truncate=False)
 
-    # [3] get edges (mapping, node:input) and input/output nodes
+    # [4] get edges (mapping, node:input) and input/output nodes
     # #####################################################################
     nodes_and_outputs = set([node.name for node in proto.node])
     nodes_and_inputs = set()
@@ -59,18 +65,18 @@ def get_topology(module, modu):
 
     # outputs is set difference { nodes_and_outputs - nodes_and_inputs }
     outputs = list(nodes_and_outputs.difference(nodes_and_inputs))
-
     # inputs is set difference { nodes_and_inputs - nodes_and_outputs }
     inputs = list(nodes_and_inputs.difference(nodes_and_outputs))
 
-    # [3] re-package in json-compatible format
+    # [5] re-package in json-compatible format
     # #####################################################################
     module = {
+        'meta': meta,
         'coords': coords,
         'edges': edges,
-        'inputs': list(inputs),
-        'outputs': list(outputs)
+        'inputs': inputs,
+        'outputs': outputs
     }
-    print(module)
+    pprint(module)
 
     return jsonify(module)

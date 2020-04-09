@@ -41,11 +41,18 @@ class Modu(object):
             'modules': set(),
             'op_nodes': set(),
             'in_nodes': set(),
+            'out_nodes': set()
         }
 
     def update_module(self, name, key, value):
         ''' updates the field of an existing module '''
+        if name not in self.modules:
+            self.add_module(name)
         self._modules[name][key].add(value)
+
+    def get_module(self, name):
+        ''' retrieves the specified module's metadata '''
+        return self._modules[name]
 
     def to_mod_proto(self, module):
         ''' exports specified module to protobuf format
@@ -82,13 +89,17 @@ class Modu(object):
         # #####################################################################
         list_of_nodes = []
 
-        # [1] first deal with op_nodes (retrieve original proto and edit it)
+        # [1] first deal with nodes (op_nodes and out_nodes)
         # #####################################################################
         for node_name in self._modules[module]['op_nodes']:
             full_name = module + node_name
             node = deepcopy(self._graphdict[full_name])
             node = _fix_node_inputs(node)
+            list_of_nodes.append(node)
 
+        for node_name in self._modules[module]['out_nodes']:
+            node = deepcopy(self._graphdict[node_name])
+            node = _fix_node_inputs(node)
             list_of_nodes.append(node)
 
         # [2] then deal with modules (create new `NodeDef` proto for each one)

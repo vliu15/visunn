@@ -34,8 +34,15 @@ const Topology = (props) => {
 
     let graph = [];
     if (ready) {
+        console.log(config);
         graph = [
-            <Nodes key={'nodes'} coords={config.coords} tag={props.tag} tagHandler={updateTagHandler} />,
+            <Nodes
+                key={'nodes'}
+                coords={config.coords}
+                inputs={config.inputs}
+                outputs={config.outputs}
+                tag={props.tag}
+                tagHandler={updateTagHandler} />,
             <Edges key={'edges'} coords={config.coords} edges={config.edges} />
         ];
     }
