@@ -19,7 +19,8 @@ const Topology = (props) => {
     // retrieves the metadata corresponding to tag every time tag changes;
     useEffect(() => {
         const getConfig = async () => {
-            let config = await fetch('http://127.0.0.1:5000/topology/' + props.tag);
+            let tag = props.tag.replace(/\//g, ';');
+            let config = await fetch('http://127.0.0.1:5000/topology/' + tag);
             let json = await config.json();
             setConfig(json);
             setReady(true);
@@ -34,10 +35,10 @@ const Topology = (props) => {
 
     let graph = [];
     if (ready) {
-        console.log(config);
         graph = [
             <Nodes
                 key={'nodes'}
+                meta={config.meta}
                 coords={config.coords}
                 inputs={config.inputs}
                 outputs={config.outputs}
@@ -49,7 +50,7 @@ const Topology = (props) => {
 
     return (
         <CanvasContainer>
-            <Canvas>
+            <Canvas camera={{position: [0, 0, 25]}}>
                 <ambientLight />
                 <pointLight color={'white'} position={[0, 0, 50]} castShadow={true} />
                 <Controls />

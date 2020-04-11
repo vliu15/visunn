@@ -89,18 +89,28 @@ class Modu(object):
         # #####################################################################
         list_of_nodes = []
 
-        # [1] first deal with nodes (op_nodes and out_nodes)
+        # [1] first deal with nodes (op_nodes, in_nodes, and out_nodes)
         # #####################################################################
-        for node_name in self._modules[module]['op_nodes']:
-            full_name = module + node_name
-            node = deepcopy(self._graphdict[full_name])
-            node = _fix_node_inputs(node)
-            list_of_nodes.append(node)
+        def add_nodes(node_type):
+            for node_name in self._modules[module][node_type]:
+                # op_nodes only contain relative name
+                if node_type == 'op_nodes':
+                    node_name = module + node_name
 
-        for node_name in self._modules[module]['out_nodes']:
-            node = deepcopy(self._graphdict[node_name])
-            node = _fix_node_inputs(node)
-            list_of_nodes.append(node)
+                node = deepcopy(self._graphdict[node_name])
+
+                # in_nodes are inputs to this module, so get rid of inputs
+                if node_type != 'in_nodes':
+                    node = _fix_node_inputs(node)
+                else:
+                    while len(node.input) > 0:
+                        del node.input[0]
+
+                list_of_nodes.append(node)
+
+        add_nodes('op_nodes')
+        add_nodes('in_nodes')
+        add_nodes('out_nodes')
 
         # [2] then deal with modules (create new `NodeDef` proto for each one)
         # #####################################################################

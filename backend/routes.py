@@ -4,7 +4,7 @@
 
 from copy import deepcopy
 from pprint import pprint
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from google.protobuf.json_format import MessageToDict
 
 from visuai.plot import plot
@@ -22,12 +22,13 @@ def topology_blueprint(modu):
     '''
     blueprint = Blueprint('topology', __name__)
 
-    @blueprint.route('/<tag>')
+    @blueprint.route('/<tag>', methods=['GET'])
     def topology(tag):
-        try:
-            module = tag.split(';', 1)[1].replace(';', '/') + '/'
-        except IndexError as ie:
+        if tag == 'root':
             module = modu.root
+        else:
+            module = tag.replace(';', '/')
+
         return get_topology(module, modu)
 
     return blueprint
@@ -56,12 +57,14 @@ def get_topology(module, modu):
 
     # [4] get edges (mapping, node:input) and input/output nodes
     # #####################################################################
-    nodes_and_outputs = set([node.name for node in proto.node])
+    nodes_and_outputs = set()
     nodes_and_inputs = set()
     edges = {}
     for node in proto.node:
         edges[node.name] = [name for name in node.input]
         nodes_and_inputs.update(edges[node.name])
+        if len(node.input) > 0:
+            nodes_and_outputs.add(node.name)
 
     # outputs is set difference { nodes_and_outputs - nodes_and_inputs }
     outputs = list(nodes_and_outputs.difference(nodes_and_inputs))
@@ -69,6 +72,12 @@ def get_topology(module, modu):
     inputs = list(nodes_and_inputs.difference(nodes_and_outputs))
 
     # [5] re-package in json-compatible format
+    # #####################################################################
+    # meta    : dict( name : node )
+    # coords  : dict( name : (x,y) )
+    # edges   : dict( name : [input] )
+    # inputs  : set( inputs )
+    # outputs : set( outputs )
     # #####################################################################
     module = {
         'meta': meta,

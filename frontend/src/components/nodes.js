@@ -3,39 +3,49 @@
  * @author Vincent Liu
  */
 
-import React, { useState, useEffect } from 'react';
-import { Dom } from 'react-three-fiber';
+import React, { useState } from 'react';
 
-import { MODULE_COLOR, MODULE_HOVER_COLOR, NODE_COLOR } from '../constants';
+import Label from './labels';
+import * as C from '../constants';
 
-
-const Text = (props) => {
-    return (
-        <Dom position={[props.x, props.y, 0]}>
-            <p>{props.text}</p>
-        </Dom>
-    )
-}
 
 const Node = (props) => {
     let [hover, setHover] = useState(false);
-    let tag = props.tag.replace(/\//g, ';').slice(0, -1);
-    let baseColor = props.isModule ? MODULE_COLOR : NODE_COLOR;
-    let hoverColor = props.isModule ? MODULE_HOVER_COLOR : NODE_COLOR;
+
+    // node colors and size
+    const [baseColor, hoverColor, size] = (
+        (props.type === 'module')
+            ? [C.MODULE_COLOR, C.MODULE_HOVER_COLOR, C.MODULE_SCALE]
+            : (props.type === 'input')
+                ? [C.INPUT_COLOR, C.INPUT_HOVER_COLOR, C.INPUT_SCALE]
+                : (props.type === 'output')
+                    ? [C.OUTPUT_COLOR, C.OUTPUT_HOVER_COLOR, C.OUTPUT_SCALE]
+                    : [C.NODE_COLOR, C.NODE_HOVER_COLOR, C.NODE_SCALE]
+    );
+
+    // node position
+    const [x, y] = props.coords;
+
+    // parent state update handler
+    const onClickHandler = (e) => {
+        if (props.type === 'module') {
+            return props.tagHandler(props.name);
+        }
+    }
 
     return (
         <>
-            <Text text={hover ? props.tag : ''} x={props.x} y={props.y} />
+            {hover ? <Label meta={props.meta} hasInput={props.type !== 'input'} x={x+2} y={y+2} /> : <></>}
             <mesh
-                position={[props.x, props.y, 0]}
+                position={[x, y, 0]}
                 rotation={[0, 0, 0]}
                 receiveShadow={true}
-                onClick={props.isModule ? () => props.tagHandler(tag) : () => {}}
+                onClick={onClickHandler}
                 onPointerOver={() => setHover(true)}
                 onPointerOut={() => setHover(false)}>
                 <boxGeometry
                     attach='geometry'
-                    args={[1, 1, 1]}
+                    args={size}
                     key={'geo'} />
                 <meshLambertMaterial
                     attach='material'
@@ -46,15 +56,36 @@ const Node = (props) => {
     );
 }
 
+/**
+ * returns a list of nodes to draw on canvas
+ * 
+ * @param {Array} props.inputs list of input node names
+ * @param {Array} props.outputs list of output node names
+ * @param {Object} props.coords mapping of name to (x,y) coordinates
+ * @param {Object} props.meta mapping of name to metadata Object
+ * @param {function} props.tagHandler callback to update parent state
+ */
 const Nodes = (props) => {
+    const type = (name) => {
+        if (name.slice(-1) === '/') {
+            return 'module';
+        } else if (props.inputs.includes(name)) {
+            return 'input';
+        } else if (props.outputs.includes(name)) {
+            return 'output';
+        } else {
+            return 'node';
+        }
+    }
+
     let nodes = Object.keys(props.coords).map(
-        (node) => 
+        (node) =>
             <Node
                 key={node}
-                isModule={node.slice(-1) === '/'}
-                x={props.coords[node][0]}
-                y={props.coords[node][1]}
-                tag={'root/' + node} 
+                name={node}
+                meta={props.meta[node]}
+                coords={props.coords[node]}
+                type={type(node)}
                 tagHandler={props.tagHandler} />
     );
     return nodes;
