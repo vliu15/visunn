@@ -17,8 +17,8 @@ __all__ = ['Modu']
 
 class Modu(object):
     ''' low level api for backend '''
-    def __init__(self, graphdef, root=MODU_ROOT):
-        self._graphdict = {node.name: node for node in graphdef.node}
+    def __init__(self, graphdict, root=MODU_ROOT):
+        self._graphdict = graphdict
 
         # initialize modules with root module
         self._root = root
@@ -41,15 +41,22 @@ class Modu(object):
             'modules': set(),
             'op_nodes': set(),
             'in_nodes': set(),
+            'out_nodes': set()
         }
 
     def update_module(self, name, key, value):
         ''' updates the field of an existing module '''
+        if name not in self.modules:
+            self.add_module(name)
         self._modules[name][key].add(value)
+
+    def get_module(self, name):
+        ''' retrieves the specified module's metadata '''
+        return self._modules[name]
 
     def to_mod_proto(self, module):
         ''' exports specified module to protobuf format
-        
+
             module   (str)  : full module name to convert to protobuf format
         '''
         # helper function
@@ -82,14 +89,28 @@ class Modu(object):
         # #####################################################################
         list_of_nodes = []
 
-        # [1] first deal with op_nodes (retrieve original proto and edit it)
+        # [1] first deal with nodes (op_nodes, in_nodes, and out_nodes)
         # #####################################################################
-        for node_name in self._modules[module]['op_nodes']:
-            full_name = module + node_name
-            node = deepcopy(self._graphdict[full_name])
-            node = _fix_node_inputs(node)
+        def add_nodes(node_type):
+            for node_name in self._modules[module][node_type]:
+                # op_nodes only contain relative name
+                if node_type == 'op_nodes':
+                    node_name = module + node_name
 
-            list_of_nodes.append(node)
+                node = deepcopy(self._graphdict[node_name])
+
+                # in_nodes are inputs to this module, so get rid of inputs
+                if node_type != 'in_nodes':
+                    node = _fix_node_inputs(node)
+                else:
+                    while len(node.input) > 0:
+                        del node.input[0]
+
+                list_of_nodes.append(node)
+
+        add_nodes('op_nodes')
+        add_nodes('in_nodes')
+        add_nodes('out_nodes')
 
         # [2] then deal with modules (create new `NodeDef` proto for each one)
         # #####################################################################

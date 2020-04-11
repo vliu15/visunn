@@ -3,28 +3,41 @@
  * @author Vincent Liu
  */
 
-import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import styled from 'styled-components';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import './App.css';
 
-import Sidebar from './containers/sidebar';
+import { Toolbar, Title, Header } from './components/toolbar';
 import Topology from './containers/topology';
-import Toolbar from './containers/toolbar';
 
-
-const Container = styled.div`
-    display: flex;
-`
 
 const App = () => {
+    let [tag, setTag] = useState('root');
+
+    const updateTag = async (newTag) => {
+        setTag(newTag);
+    }
+
     return (
         <div className='App'>
             <Router>
-                <Toolbar />
+                <Toolbar>
+                    <Link to='/' style={{textDecoration: 'none'}}>
+                        <Title>v i s u a i</Title>
+                    </Link>
+                    <Link to='/topology' style={{textDecoration: 'none'}}>
+                        <Header onClick={() => setTag('root')}>topology</Header>
+                    </Link>
+                    <Link to='/metrics' style={{textDecoration: 'none'}}>
+                        <Header>metrics</Header>
+                    </Link>
+                </Toolbar>
+
                 <Switch>
                     <Route exact path='/' />
-                    <Route path='/topology/:tag' component={Topology} />
+                    <Route path='/topology'>
+                        <Topology tag={tag} tagHandler={updateTag} />
+                    </Route>
                     <Route path='/metrics' />
                 </Switch>
             </Router>
