@@ -39,8 +39,8 @@ const Node = (props) => {
                 ? <Label
                     meta={props.meta}
                     isInput={props.type === C.INPUT_TYPE || props.meta.op === C.IO_NODE_TYPE}
-                    x={x+2}
-                    y={y+2} />
+                    x={x}
+                    y={y} />
                 : <></>}
             <mesh
                 position={[x, y, 0]}
