@@ -9,6 +9,15 @@ import Label from './labels';
 import * as C from '../constants';
 
 
+/**
+ * returns a mesh component corresponding to a node to be drawn on the canvas
+ * 
+ * @param {string} props.type value indicating the type of node
+ * @param {Array} props.coords an array of (x,y) coordinates
+ * @param {function} props.tagHandler callback used to update parent state
+ * @param {string} props.name name of the module this node corresponds to
+ * @param {Object} props.meta mapping of {name, op, input, attr} to its values
+ */
 const Node = (props) => {
     let [hover, setHover] = useState(false);
 
@@ -38,7 +47,10 @@ const Node = (props) => {
             {hover
                 ? <Label
                     meta={props.meta}
-                    showShapes={props.type === C.INPUT_TYPE || props.meta.op === C.IO_NODE_TYPE || props.meta.op === C.PARAM_NODE_TYPE}
+                    showShapes={
+                        props.type === C.INPUT_TYPE ||
+                        props.meta.op === C.IO_NODE_TYPE ||
+                        props.meta.op === C.PARAM_NODE_TYPE}
                     x={x}
                     y={y} />
                 : <></>}
@@ -63,7 +75,7 @@ const Node = (props) => {
 }
 
 /**
- * returns a list of nodes to draw on canvas
+ * returns a list of meshes (nodes) to draw on the canvas
  * 
  * @param {Array} props.inputs list of input node names
  * @param {Array} props.outputs list of output node names

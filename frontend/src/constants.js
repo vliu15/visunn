@@ -1,5 +1,8 @@
-// DISPLAY CONSTANTS
-// ////////////////////////////////////////////////////////////////////////////
+/**
+ * @file constants used for rendering
+ * @author Vincent Liu
+ */
+
 
 // input nodes
 export const INPUT_COLOR = 0xFDCB6E;

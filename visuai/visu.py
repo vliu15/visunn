@@ -4,13 +4,10 @@
 
 import os
 import pickle
-import networkx as nx
-import matplotlib.pyplot as plt
 from torch.utils.tensorboard._pytorch_graph import graph
 
-from constants import LOG_DIR, MODU_FILE, MODU_ROOT
+from constants import LOG_DIR, MODU_FILE
 from visuai.util import prune_nodes, prune_modules, build_modu
-from visuai.plot import plot
 from visuai.modu import Modu
 
 __author__ = 'Vincent Liu'
@@ -21,13 +18,20 @@ __all__ = ['Visu']
 
 class Visu(object):
     ''' high level api for users '''
-    def __init__(self, model, dataloader, logdir=''):
+    def __init__(self, model, dataloader, logdir='', name='model'):
         ''' initializes visu, which builds model topology
 
             model       (torch.nn.Module)             : pytorch model
             dataloader  (torch.utils.data.Dataloader) : dataloader of inputs
             logdir      (str)                         : folder to dump pickle
+            name        (str)                         : model name, no real use
         '''
+        pid = os.fork()
+
+        # return parent process
+        if pid != 0:
+            return
+
         # [0] just get the first batch of inputs for now
         inputs, _ = next(iter(dataloader))
 
@@ -97,11 +101,12 @@ class Visu(object):
         with open(os.path.join(logdir, MODU_FILE), 'wb') as f:
             pickle.dump(self._modu, f)
 
-        # auxiliary functionality
-        self._params = [name for name, _ in model.named_parameters()]
-        self._logdir = logdir
+        # terminate child process
+        print('Successfully parsed and saved {} topology!'
+              .format(name), flush=True)
+        os._exit(0)
 
-    # TODO: write this function
+    # NOTE: see https://www.wandb.com for this functionality
     def update(self, iter, optim, loss):
         ''' logs updates to the model
 
@@ -110,20 +115,3 @@ class Visu(object):
             loss   (torch.Tensor)          : tensor loss
         '''
         raise NotImplementedError
-
-    def save(self, filename='topology.png'):
-        ''' saves the topology to file '''
-        # get coordinates of flattened graph from dot algorithm
-        # #####################################################################
-        # dot algorithm:
-        #   https://www.graphviz.org/Documentation/TSE93.pdf
-        # #####################################################################
-        G, pos = plot(self._modu.to_flat_proto(),
-                      normalize=False, truncate=True)
-        plt.figure(figsize=(8, 8))
-        nx.draw(
-            G, pos,
-            node_size=100, node_color='gray', font_size=8,
-            font_weight='light', with_labels=True
-        )
-        plt.savefig(os.path.join(self._logdir, filename))

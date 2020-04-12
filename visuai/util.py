@@ -3,8 +3,7 @@
 ''' contains util functions to facilitate graph parsing '''
 
 from copy import copy
-from tensorboard.compat.proto.node_def_pb2 import NodeDef
-from google.protobuf.json_format import MessageToDict, MessageToJson
+from google.protobuf.json_format import MessageToJson
 
 from visuai.modu import Modu
 from constants import MODU_ROOT

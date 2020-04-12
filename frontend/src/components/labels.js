@@ -25,26 +25,12 @@ const Entry = styled.p`
     margin: 0;
 `
 
-const parseShapes = (attrDict, keys) => {
-    let shapeStrs = [];
-    for (let key of keys) {
-        for (let shape of attrDict[key]['list']['shape']) {
-            let shapeStr = [];
-            for (let dim of shape['dim']) {
-                shapeStr.push(dim['size']);
-            }
-            shapeStrs.push('[' + shapeStr.join(', ') + ']');
-        }
-    }
-    return shapeStrs;
-}
-
 /**
  * returns a dom element of metadata label
  * 
  * @param {int} props.x x coordinate of label
  * @param {int} props.y y coordinate of label
- * @param {bool} props.hasInput whether this label should display inputs
+ * @param {bool} props.showShapes whether this label should display i/o shapes
  * @param {Object} props.meta contains metadata {name, op, (input)}
  */
 const Label = (props) => {
@@ -60,6 +46,21 @@ const Label = (props) => {
         } else {
             return <Entry>inputs        : </Entry>;
         }
+    }
+
+    // returns stringified i/o shapes (called from getShapes)
+    const parseShapes = (attrDict, keys) => {
+        let shapeStrs = [];
+        for (let key of keys) {
+            for (let shape of attrDict[key]['list']['shape']) {
+                let shapeStr = [];
+                for (let dim of shape['dim']) {
+                    shapeStr.push(dim['size']);
+                }
+                shapeStrs.push('[' + shapeStr.join(', ') + ']');
+            }
+        }
+        return shapeStrs;
     }
     
     // get input/output shapes for the node
@@ -79,6 +80,7 @@ const Label = (props) => {
         if (keys.length === 0) {
             return <></>;
         }
+
         // map shapes to text entries
         return parseShapes(props.meta.attr, keys).map(
             (element, idx) =>

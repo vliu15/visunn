@@ -10,6 +10,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 extend({ OrbitControls });
 
+/**
+ * component for camera orbitcontrols for three.js
+ * 
+ * @param {string} props.tag global module tag, tracked to set default rotation
+ */
 function Controls(props) {
     // allow user to stop rotation by clicking
     window.addEventListener('mousedown', () => setClicked(true));
