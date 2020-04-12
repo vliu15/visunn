@@ -97,11 +97,7 @@ class Visu(object):
         with open(os.path.join(logdir, MODU_FILE), 'wb') as f:
             pickle.dump(self._modu, f)
 
-        # auxiliary functionality
-        self._params = [name for name, _ in model.named_parameters()]
-        self._logdir = logdir
-
-    # TODO: write this function
+    # NOTE: see https://www.wandb.com for this functionality
     def update(self, iter, optim, loss):
         ''' logs updates to the model
 
@@ -110,20 +106,3 @@ class Visu(object):
             loss   (torch.Tensor)          : tensor loss
         '''
         raise NotImplementedError
-
-    def save(self, filename='topology.png'):
-        ''' saves the topology to file '''
-        # get coordinates of flattened graph from dot algorithm
-        # #####################################################################
-        # dot algorithm:
-        #   https://www.graphviz.org/Documentation/TSE93.pdf
-        # #####################################################################
-        G, pos = plot(self._modu.to_flat_proto(),
-                      normalize=False, truncate=True)
-        plt.figure(figsize=(8, 8))
-        nx.draw(
-            G, pos,
-            node_size=100, node_color='gray', font_size=8,
-            font_weight='light', with_labels=True
-        )
-        plt.savefig(os.path.join(self._logdir, filename))

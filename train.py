@@ -98,7 +98,7 @@ def main(args):
     model = torch_models.get(args.name, None)
     if model is None:
         print('Valid name specifications are {}'
-                .format(', '.join(MODEL_MAP.keys())))
+                .format(', '.join(torch_models.keys())))
         raise RuntimeError
     else:
         model = model(num_classes=10)
