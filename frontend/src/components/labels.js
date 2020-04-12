@@ -25,18 +25,18 @@ const Entry = styled.p`
     margin: 0;
 `
 
-const parseOutputShapes = (attrDict, keys) => {
-    let outputShapes = [];
+const parseShapes = (attrDict, keys) => {
+    let shapeStrs = [];
     for (let key of keys) {
         for (let shape of attrDict[key]['list']['shape']) {
-            let outputShape = [];
+            let shapeStr = [];
             for (let dim of shape['dim']) {
-                outputShape.push(dim['size']);
+                shapeStr.push(dim['size']);
             }
-            outputShapes.push('[' + outputShape.join(', ') + ']');
+            shapeStrs.push('[' + shapeStr.join(', ') + ']');
         }
     }
-    return outputShapes;
+    return shapeStrs;
 }
 
 /**
@@ -61,41 +61,57 @@ const Label = (props) => {
             return <Entry>inputs        : </Entry>;
         }
     }
-    const inputs = getInputs();
-
-    const getOutputShapes = () => {
+    
+    // get input/output shapes for the node
+    const getShapes = (prefix, label) => {
         // make sure this node has an attr object
         if (!('attr' in props.meta)) {
-            return <Entry>output shapes : </Entry>;
+            return <></>;
         }
 
         // make sure the attr object contains output shapes
         let keys = [];
         for (let key in props.meta.attr) {
-            if (key.startsWith('_output_shapes')) {
+            if (key.startsWith(prefix)) {
                 keys.push(key);
             }
         }
         if (keys.length === 0) {
-            return <Entry>output shapes : </Entry>;
+            return <></>;
         }
-
-        // map output shapes to text entries
-        return parseOutputShapes(props.meta.attr, keys).map(
+        // map shapes to text entries
+        return parseShapes(props.meta.attr, keys).map(
             (element, idx) =>
                 (idx === 0)
-                    ? <Entry key={element}>output shapes : {element}</Entry>
+                    ? <Entry key={element}>{label} : {element}</Entry>
                     : <Entry key={element}>                {element}</Entry>
         );
     }
-    const outputShapes = getOutputShapes();
+
+    // format dom elements if the node is considered an input
+    const name = (!props.isInput)
+        ? <Entry>name          : {props.meta.name}</Entry>
+        : <Entry>name : {props.meta.name}</Entry>
+    const op = (!props.isInput)
+        ? <Entry>op            : {props.meta.op}</Entry>
+        : <Entry>op   : {props.meta.op}</Entry>
+    const inputs = (!props.isInput)
+        ? getInputs()
+        : <></>;
+    const inputShapes = (!props.isInput)
+        ? getShapes('_input_shapes', 'input shapes ')
+        : <></>;
+    const outputShapes = (!props.isInput)
+        ? getShapes('_output_shapes', 'output shapes')
+        : <></>;
 
     return (
         <Dom position={[props.x, props.y, 0]}>
             <Metadata>
-                <Entry>name          : {props.meta.name}</Entry>  
-                <Entry>op            : {props.meta.op}</Entry>
+                {name}
+                {op}
                 {inputs}
+                {inputShapes}
                 {outputShapes}
             </Metadata>
         </Dom>
