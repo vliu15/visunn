@@ -38,9 +38,9 @@ const Node = (props) => {
             {hover
                 ? <Label
                     meta={props.meta}
-                    isInput={props.type === C.INPUT_TYPE || props.meta.op === C.IO_NODE_TYPE}
-                    x={x+2}
-                    y={y+2} />
+                    showShapes={props.type === C.INPUT_TYPE || props.meta.op === C.IO_NODE_TYPE || props.meta.op === C.PARAM_NODE_TYPE}
+                    x={x}
+                    y={y} />
                 : <></>}
             <mesh
                 position={[x, y, 0]}

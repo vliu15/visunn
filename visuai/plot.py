@@ -4,6 +4,7 @@
 
 import networkx as nx
 import numpy as np
+from pprint import pprint
 
 from constants import NORM_FUNC, NORM_M, NORM_V
 
@@ -89,8 +90,10 @@ def plot(edges, normalize=True, truncate=False):
     xs, ys = zip(*pos.values())
     rescale_func = eval(NORM_FUNC)
     xnorm, ynorm = rescale_func(xs, ys)
+    pprint(pos)
 
     for node, (x, y) in pos.items():
         pos[node] = (xnorm(x), ynorm(y))
+    pprint(pos)
 
     return G, pos

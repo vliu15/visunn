@@ -142,6 +142,4 @@ class Modu(object):
         inputs = list(module['in_nodes'])
         outputs = list(module['out_nodes'])
 
-        pprint(meta)
-
         return (meta, inputs, outputs)

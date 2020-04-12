@@ -50,10 +50,12 @@ const Topology = (props) => {
 
     return (
         <CanvasContainer>
-            <Canvas camera={{position: [0, 0, 25]}}>
+            <Canvas camera={{position: [0, 0, 25]}} gl={{physicallyCorrectLights: true}}>
                 <ambientLight />
-                <pointLight color={'white'} position={[0, 0, 50]} castShadow={true} />
-                <Controls />
+                <pointLight color={'white'} position={[0, 0, 5000]} castShadow={true} />
+                {/* <pointLight color={'white'} position={[0, 50, 0]} castShadow={true} /> */}
+                <pointLight color={'white'} position={[5000, 0, 0]} castShadow={true} />
+                <Controls tag={props.tag}/>
                 {graph}
             </Canvas>
         </CanvasContainer>
