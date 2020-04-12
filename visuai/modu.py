@@ -3,9 +3,12 @@
 ''' contains modu class for modular topology for backend api '''
 
 from copy import deepcopy
+from pprint import pprint
 from tensorboard.compat.proto.graph_pb2 import GraphDef
 from tensorboard.compat.proto.node_def_pb2 import NodeDef
 from tensorboard.compat.proto.versions_pb2 import VersionDef
+from tensorboard.compat.proto.attr_value_pb2 import AttrValue
+from google.protobuf.json_format import MessageToDict, Parse
 
 from constants import MODU_ROOT
 
@@ -41,7 +44,9 @@ class Modu(object):
             'modules': set(),
             'op_nodes': set(),
             'in_nodes': set(),
-            'out_nodes': set()
+            'in_shapes': set(),
+            'out_nodes': set(),
+            'out_shapes': set()
         }
 
     def update_module(self, name, key, value):
@@ -50,30 +55,57 @@ class Modu(object):
             self.add_module(name)
         self._modules[name][key].add(value)
 
-    def get_module(self, name):
-        ''' retrieves the specified module's metadata '''
-        return self._modules[name]
+    def export(self, name):
+        ''' exports the metadata of the specified module as a dict '''
+        module = self._modules[name]
+        meta = {}
 
-    def to_mod_proto(self, module):
-        ''' exports specified module to protobuf format
-
-            module   (str)  : full module name to convert to protobuf format
-        '''
-        # helper function
-        # #####################################################################
-        # checks each node input: inputs that come from submodules get mapped
-        # to that submodule (to be consistent with modularlization)
-        # #####################################################################
         def _fix_node_inputs(node):
             ''' edits node inputs to reflect modularization '''
             for idx, input_name in enumerate(node.input):
                 # if input comes from this module
-                if input_name.find(module) == 0:
-                    sub_name = input_name[len(module):].split('/')[0]
+                if input_name.find(name) == 0:
+                    sub_name = input_name[len(name):].split('/')[0]
                     # if input comes from a submodule
-                    if sub_name in self._modules[module]['modules']:
-                        node.input[idx] = module + sub_name + '/'
+                    if sub_name in module['modules']:
+                        node.input[idx] = name + sub_name + '/'
             return node
+
+        def _add_nodes(node_type):
+            ''' adds nodes to the metadata dict '''
+            for node_name in module[node_type]:
+                # op_nodes only contain relative name
+                if node_type == 'op_nodes':
+                    node_name = name + node_name
+
+                node = deepcopy(self._graphdict[node_name])
+
+                # in_nodes are inputs to this module, so get rid of inputs
+                if node_type != 'in_nodes':
+                    node = _fix_node_inputs(node)
+                else:
+                    while len(node.input) > 0:
+                        del node.input[0]
+                meta[node_name] = MessageToDict(node)
+
+        def _add_modules():
+            ''' adds all modules to the metadata dict '''
+            for submodule in module['modules']:
+                sub_name = name + submodule + '/'
+                submodule = self._modules[sub_name]
+                attr = {}
+                for i, output_shape in enumerate(submodule['out_shapes']):
+                    key = '_output_shapes_{}'.format(i)
+                    attr[key] = Parse(output_shape, AttrValue())
+
+                node = NodeDef(
+                    name=sub_name.encode(encoding='utf-8'),
+                    op='visu::module',
+                    input=list(submodule['in_nodes']),
+                    attr=attr
+                )
+                node = _fix_node_inputs(node)
+                meta[sub_name] = MessageToDict(node)
 
         # convert all modules and nodes to `NodeDef` proto
         # #####################################################################
@@ -84,54 +116,17 @@ class Modu(object):
         # all node names displayed in the module will be a relative path, since
         # the module specified will already be an absolute path
         #
-        # input node names to this module (from other modules) will be full
-        # paths, since their origin is from outside the module
+        # input and output node names to this module (from other modules) will
+        # be full paths, since their origin is from outside the module
         # #####################################################################
-        list_of_nodes = []
+        _add_nodes('op_nodes')
+        _add_nodes('in_nodes')
+        _add_nodes('out_nodes')
+        _add_modules()
 
-        # [1] first deal with nodes (op_nodes, in_nodes, and out_nodes)
-        # #####################################################################
-        def add_nodes(node_type):
-            for node_name in self._modules[module][node_type]:
-                # op_nodes only contain relative name
-                if node_type == 'op_nodes':
-                    node_name = module + node_name
+        inputs = list(module['in_nodes'])
+        outputs = list(module['out_nodes'])
 
-                node = deepcopy(self._graphdict[node_name])
+        pprint(meta)
 
-                # in_nodes are inputs to this module, so get rid of inputs
-                if node_type != 'in_nodes':
-                    node = _fix_node_inputs(node)
-                else:
-                    while len(node.input) > 0:
-                        del node.input[0]
-
-                list_of_nodes.append(node)
-
-        add_nodes('op_nodes')
-        add_nodes('in_nodes')
-        add_nodes('out_nodes')
-
-        # [2] then deal with modules (create new `NodeDef` proto for each one)
-        # #####################################################################
-        for submodule in self._modules[module]['modules']:
-            name = module + submodule + '/'
-
-            node = NodeDef(
-                name=name.encode(encoding='utf-8'),
-                op='visu::module',
-                input=list(self._modules[name]['in_nodes']),
-                attr={}
-            )
-            node = _fix_node_inputs(node)
-
-            list_of_nodes.append(node)
-
-        proto = GraphDef(node=list_of_nodes, versions=VersionDef(producer=22))
-        return proto
-
-    def to_flat_proto(self):
-        ''' exports entire model, flattened, to protobuf format '''
-        list_of_nodes = [node for node in self._graphdict.values()]
-        proto = GraphDef(node=list_of_nodes, versions=VersionDef(producer=22))
-        return proto
+        return (meta, inputs, outputs)

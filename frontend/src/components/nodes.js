@@ -14,13 +14,13 @@ const Node = (props) => {
 
     // node colors and size
     const [baseColor, hoverColor, size] = (
-        (props.type === 'module')
-            ? [C.MODULE_COLOR, C.MODULE_HOVER_COLOR, C.MODULE_SCALE]
-            : (props.type === 'input')
-                ? [C.INPUT_COLOR, C.INPUT_HOVER_COLOR, C.INPUT_SCALE]
-                : (props.type === 'output')
-                    ? [C.OUTPUT_COLOR, C.OUTPUT_HOVER_COLOR, C.OUTPUT_SCALE]
-                    : [C.NODE_COLOR, C.NODE_HOVER_COLOR, C.NODE_SCALE]
+        (props.type === C.MODULE_TYPE)
+            ? [C.MODULE_COLOR, C.MODULE_HOVER_COLOR, C.MODULE_SIZE]
+            : (props.type === C.INPUT_TYPE)
+                ? [C.INPUT_COLOR, C.INPUT_HOVER_COLOR, C.INPUT_SIZE]
+                : (props.type === C.OUTPUT_TYPE)
+                    ? [C.OUTPUT_COLOR, C.OUTPUT_HOVER_COLOR, C.OUTPUT_SIZE]
+                    : [C.NODE_COLOR, C.NODE_HOVER_COLOR, C.NODE_SIZE]
     );
 
     // node position
@@ -28,14 +28,19 @@ const Node = (props) => {
 
     // parent state update handler
     const onClickHandler = (e) => {
-        if (props.type === 'module') {
+        if (props.type === C.MODULE_TYPE) {
             return props.tagHandler(props.name);
         }
     }
 
     return (
         <>
-            {hover ? <Label meta={props.meta} hasInput={props.type !== 'input'} x={x+2} y={y+2} /> : <></>}
+            {hover
+                ? <Label
+                    meta={props.meta}
+                    x={x+2}
+                    y={y+2} />
+                : <></>}
             <mesh
                 position={[x, y, 0]}
                 rotation={[0, 0, 0]}
@@ -68,24 +73,24 @@ const Node = (props) => {
 const Nodes = (props) => {
     const type = (name) => {
         if (name.slice(-1) === '/') {
-            return 'module';
+            return C.MODULE_TYPE;
         } else if (props.inputs.includes(name)) {
-            return 'input';
+            return C.INPUT_TYPE;
         } else if (props.outputs.includes(name)) {
-            return 'output';
+            return C.OUTPUT_TYPE;
         } else {
-            return 'node';
+            return C.NODE_TYPE;
         }
     }
 
     let nodes = Object.keys(props.coords).map(
-        (node) =>
+        (name) =>
             <Node
-                key={node}
-                name={node}
-                meta={props.meta[node]}
-                coords={props.coords[node]}
-                type={type(node)}
+                key={name}
+                name={name}
+                meta={props.meta[name]}
+                coords={props.coords[name]}
+                type={type(name)}
                 tagHandler={props.tagHandler} />
     );
     return nodes;

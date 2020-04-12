@@ -4,7 +4,7 @@
 
 from copy import copy
 from tensorboard.compat.proto.node_def_pb2 import NodeDef
-from google.protobuf.json_format import MessageToDict
+from google.protobuf.json_format import MessageToDict, MessageToJson
 
 from visuai.modu import Modu
 from constants import MODU_ROOT
@@ -181,9 +181,15 @@ def build_modu(graphdict):
         # add op node to deepest nested module
         md.update_module(mod_name, 'op_nodes', op_node)
 
-        # add inputs to each module (an input comes from another module)
-        for in_node in node.input:
-            in_modules = in_node.split('/')[:-1]
+        # add inputs/outputs to each module (comes from another module)
+        for in_name in node.input:
+            in_node = graphdict[in_name]
+            if '_output_shapes' in in_node.attr.keys():
+                output_shapes = MessageToJson(in_node.attr['_output_shapes'])
+            else:
+                output_shapes = None
+
+            in_modules = in_name.split('/')[:-1]
             in_mod_name = md.root
             out_mod_name = md.root
 
@@ -195,17 +201,28 @@ def build_modu(graphdict):
                 in_mod_name += in_module + '/'
 
                 if in_module != out_module or is_link:
-                    md.update_module(out_mod_name, 'in_nodes', in_node)
+                    # link inputs and outputs
+                    md.update_module(out_mod_name, 'in_nodes', in_name)
                     md.update_module(in_mod_name, 'out_nodes', name)
+
+                    # add input and output shapes
+                    if output_shapes is not None:
+                        md.update_module(out_mod_name, 'in_shapes', output_shapes)
+                        md.update_module(in_mod_name, 'out_shapes', output_shapes)
+
                     is_link = True
 
             if len(in_modules) < len(modules):
                 for idx in range(len(in_modules), len(modules)):
                     out_mod_name += modules[idx] + '/'
-                    md.update_module(out_mod_name, 'in_nodes', in_node)
+                    md.update_module(out_mod_name, 'in_nodes', in_name)
+                    if output_shapes is not None:
+                        md.update_module(out_mod_name, 'in_shapes', output_shapes)
             elif len(in_modules) > len(modules):
                 for idx in range(len(modules), len(in_modules)):
                     in_mod_name += in_modules[idx] + '/'
                     md.update_module(in_mod_name, 'out_nodes', name)
+                    if output_shapes is not None:
+                        md.update_module(in_mod_name, 'out_shapes', output_shapes)
 
     return md
