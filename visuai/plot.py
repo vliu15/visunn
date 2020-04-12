@@ -4,7 +4,6 @@
 
 import networkx as nx
 import numpy as np
-from pprint import pprint
 
 from constants import NORM_FUNC, NORM_M, NORM_V
 

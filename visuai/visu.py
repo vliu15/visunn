@@ -4,13 +4,10 @@
 
 import os
 import pickle
-import networkx as nx
-import matplotlib.pyplot as plt
 from torch.utils.tensorboard._pytorch_graph import graph
 
-from constants import LOG_DIR, MODU_FILE, MODU_ROOT
+from constants import LOG_DIR, MODU_FILE
 from visuai.util import prune_nodes, prune_modules, build_modu
-from visuai.plot import plot
 from visuai.modu import Modu
 
 __author__ = 'Vincent Liu'

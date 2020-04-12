@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 ''' script for backend debugging and sanity checks '''
 
-import time
 import os
+import time
 import argparse
 from pprint import pprint
 from torch.utils.data import DataLoader
@@ -13,6 +13,9 @@ from torch.utils.tensorboard._pytorch_graph import graph
 from models import torch_models
 from constants import DATA_DIR
 from visuai.util import prune_nodes, prune_modules, build_modu
+
+__author__ = 'Vincent Liu'
+__email__ = 'vliu15@stanford.edu'
 
 
 def get_model_and_dataloader(name):

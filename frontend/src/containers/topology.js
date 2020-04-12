@@ -12,6 +12,12 @@ import Edges from '../components/edges';
 import Controls from '../components/controls';
 
 
+/**
+ * returns the canvas and all its elements draw on it
+ * 
+ * @param {string} props.tag name of the module currently rendered
+ * @param {function} props.tagHandler callback used to update the parent state
+ */
 const Topology = (props) => {
     let [ready, setReady] = useState(false);
     let [config, setConfig] = useState({});
@@ -50,11 +56,12 @@ const Topology = (props) => {
 
     return (
         <CanvasContainer>
-            <Canvas camera={{position: [0, 0, 25]}} gl={{physicallyCorrectLights: true}}>
+            <Canvas
+                camera={{position: [0, 0, 25]}}
+                gl={{physicallyCorrectLights: true}}>
                 <ambientLight />
-                <pointLight color={'white'} position={[0, 0, 5000]} castShadow={true} />
-                {/* <pointLight color={'white'} position={[0, 50, 0]} castShadow={true} /> */}
-                <pointLight color={'white'} position={[5000, 0, 0]} castShadow={true} />
+                <pointLight position={[0, 0, 5000]} castShadow={true} />
+                <pointLight position={[5000, 0, 0]} castShadow={true} />
                 <Controls tag={props.tag}/>
                 {graph}
             </Canvas>

@@ -3,16 +3,9 @@
 ''' contains modu class for modular topology for backend api '''
 
 import json
-from copy import deepcopy
-from pprint import pprint
-from tensorboard.compat.proto.graph_pb2 import GraphDef
-from tensorboard.compat.proto.node_def_pb2 import NodeDef
-from tensorboard.compat.proto.versions_pb2 import VersionDef
-from tensorboard.compat.proto.attr_value_pb2 import AttrValue
-from google.protobuf.json_format import MessageToDict, Parse
+from google.protobuf.json_format import MessageToDict
 
 from constants import MODU_ROOT
-from backend.node import Node
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -89,7 +82,9 @@ class Modu(object):
                     for i, in_name in enumerate(node['input']):
                         in_node = MessageToDict(self._graphdict[in_name])
                         if '_output_shapes' in in_node['attr'].keys():
-                            node['attr']['_input_shapes_{}'.format(i)] = in_node['attr']['_output_shapes']
+                            key_in = '_input_shapes_{}'.format(i)
+                            key_out = '_output_shapes'
+                            node['attr'][key_in] = in_node['attr'][key_out]
                     node = _fix_node_inputs(node)
                 else:
                     node['input'] = []
@@ -122,12 +117,8 @@ class Modu(object):
                 node = _fix_node_inputs(node_info)
                 meta[sub_name] = node
 
-        # convert all modules and nodes to `NodeDef` proto
+        # convert all modules and nodes to dict
         # #####################################################################
-        # sample function: node_proto()
-        #   https://github.com/pytorch/...
-        #       pytorch/blob/master/torch/utils/tensorboard/_proto_graph.py#L28
-        #
         # all node names displayed in the module will be a relative path, since
         # the module specified will already be an absolute path
         #
