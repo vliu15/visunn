@@ -20,7 +20,7 @@ __email__ = 'vliu15@stanford.edu'
 
 
 def train(train_data, test_data, model, objective, optimizer, device,
-          epochs=100, scheduler=None, logdir=''):
+          epochs=100, scheduler=None, logdir='', name='model'):
     ''' trains and tests a model for 100 epochs
 
         train_data  (utils.data.DataLoader)      : train dataset
@@ -32,11 +32,12 @@ def train(train_data, test_data, model, objective, optimizer, device,
         epochs      (int)                        : number of training epochs
         scheduler   (optim.LRScheduler)          : scheduler for learning rate
         logdir      (str)                        : path to logging directory
+        name        (str)                        : model name, no real use
     '''
     best_loss = float('inf')
     best_model = None
 
-    visu = Visu(model, train_data, logdir=logdir)
+    visu = Visu(model, train_data, logdir=logdir, name=name)
 
     for epoch in range(1, epochs+1):
 
@@ -138,8 +139,10 @@ def main(args):
     optimizer = optim.Adam(
         model.parameters(), lr=1e-3)
 
-    model = train(train_data, test_data, model, objective, optimizer, device,
-                  epochs=100, scheduler=scheduler, logdir=args.logdir)
+    model = train(
+        train_data, test_data, model, objective, optimizer, device,
+        epochs=100, scheduler=scheduler, logdir=args.logdir, name=args.name
+    )
 
 
 if __name__ == '__main__':

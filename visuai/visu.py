@@ -21,13 +21,20 @@ __all__ = ['Visu']
 
 class Visu(object):
     ''' high level api for users '''
-    def __init__(self, model, dataloader, logdir=''):
+    def __init__(self, model, dataloader, logdir='', name='model'):
         ''' initializes visu, which builds model topology
 
             model       (torch.nn.Module)             : pytorch model
             dataloader  (torch.utils.data.Dataloader) : dataloader of inputs
             logdir      (str)                         : folder to dump pickle
+            name        (str)                         : model name, no real use
         '''
+        pid = os.fork()
+
+        # return parent process
+        if pid != 0:
+            return
+
         # [0] just get the first batch of inputs for now
         inputs, _ = next(iter(dataloader))
 
@@ -96,6 +103,11 @@ class Visu(object):
         os.makedirs(os.path.join(os.getcwd(), logdir))
         with open(os.path.join(logdir, MODU_FILE), 'wb') as f:
             pickle.dump(self._modu, f)
+
+        # terminate child process
+        print('Successfully parsed and saved {} topology!'
+              .format(name), flush=True)
+        os._exit(0)
 
     # NOTE: see https://www.wandb.com for this functionality
     def update(self, iter, optim, loss):
