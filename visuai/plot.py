@@ -53,20 +53,20 @@ def _rescale_to_gaussian(xs, ys):
     return xnorm, ynorm
 
 
-def plot(graphdef, normalize=True, truncate=False):
+def plot(edges, normalize=True, truncate=False):
     ''' plots the graph and retrieves coordinates
 
-        graphdef   (GraphDef.proto) : GraphDef proto of model
-        normalize  (bool)           : whether to normalize coordinates
-        truncate   (bool)           : whether to truncate names of nodes
+        edges      (dict) : mapping of each node to its inputs
+        normalize  (bool) : whether to normalize coordinates
+        truncate   (bool) : whether to truncate names of nodes
                                       (useful when rendering with graphviz)
     '''
     # [1] first create graph by adding edges
     # #########################################################################
     G = nx.DiGraph()
-    for node in graphdef.node:
-        for input_node in node.input:
-            G.add_edge(input_node, node.name)
+    for name, inputs in edges.items():
+        for in_name in inputs:
+            G.add_edge(in_name, name)
 
     # [2] truncate names for visibility (for debugging purposes)
     # #########################################################################

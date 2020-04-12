@@ -25,6 +25,20 @@ const Entry = styled.p`
     margin: 0;
 `
 
+const parseOutputShapes = (attrDict, keys) => {
+    let outputShapes = [];
+    for (let key of keys) {
+        for (let shape of attrDict[key]['list']['shape']) {
+            let outputShape = [];
+            for (let dim of shape['dim']) {
+                outputShape.push(dim['size']);
+            }
+            outputShapes.push('[' + outputShape.join(', ') + ']');
+        }
+    }
+    return outputShapes;
+}
+
 /**
  * returns a dom element of metadata label
  * 
@@ -36,23 +50,53 @@ const Entry = styled.p`
 const Label = (props) => {
     // format list of inputs (if applicable)
     const getInputs = () => {
-        if (props.hasInput) {
+        if ('input' in props.meta) {
             return props.meta.input.map(
-                (element) => <Entry key={element}>         {element}</Entry>
+                (element, idx) => 
+                    (idx === 0)
+                        ? <Entry key={element}>inputs        : {element}</Entry>
+                        : <Entry key={element}>                {element}</Entry>
             );
         } else {
-            return <></>;
+            return <Entry>inputs        : </Entry>;
         }
     }
     const inputs = getInputs();
 
+    const getOutputShapes = () => {
+        // make sure this node has an attr object
+        if (!('attr' in props.meta)) {
+            return <Entry>output shapes : </Entry>;
+        }
+
+        // make sure the attr object contains output shapes
+        let keys = [];
+        for (let key in props.meta.attr) {
+            if (key.startsWith('_output_shapes')) {
+                keys.push(key);
+            }
+        }
+        if (keys.length === 0) {
+            return <Entry>output shapes : </Entry>;
+        }
+
+        // map output shapes to text entries
+        return parseOutputShapes(props.meta.attr, keys).map(
+            (element, idx) =>
+                (idx === 0)
+                    ? <Entry key={element}>output shapes : {element}</Entry>
+                    : <Entry key={element}>                {element}</Entry>
+        );
+    }
+    const outputShapes = getOutputShapes();
+
     return (
         <Dom position={[props.x, props.y, 0]}>
             <Metadata>
-                <Entry>name   : {props.meta.name}</Entry>
-                <Entry>op     : {props.meta.op}</Entry>
-                <Entry>inputs :</Entry>
+                <Entry>name          : {props.meta.name}</Entry>  
+                <Entry>op            : {props.meta.op}</Entry>
                 {inputs}
+                {outputShapes}
             </Metadata>
         </Dom>
     )
