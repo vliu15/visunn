@@ -27,3 +27,6 @@ export const NODE_TYPE = 'node';
 
 // io nodes
 export const IO_NODE_TYPE = 'IO Node';
+
+// param nodes
+export const PARAM_NODE_TYPE = 'visu::param'

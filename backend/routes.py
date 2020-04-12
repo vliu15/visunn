@@ -55,7 +55,6 @@ def topology_blueprint(modu):
             'outputs': outputs
         }
 
-        pprint(module)
         return jsonify(module)
 
     return blueprint

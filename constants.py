@@ -21,6 +21,6 @@ MODU_FILE = 'modu.pt'
 MODU_ROOT = ''
 
 # plot config
-NORM_FUNC = '_rescale_to_uniform'
+NORM_FUNC = '_rescale_to_gaussian'
 NORM_M = 0.0
-NORM_V = 10.0
+NORM_V = 5.0

@@ -89,19 +89,19 @@ const Label = (props) => {
     }
 
     // format dom elements if the node is considered an input
-    const name = (!props.isInput)
+    const name = (!props.showShapes)
         ? <Entry>name          : {props.meta.name}</Entry>
         : <Entry>name : {props.meta.name}</Entry>
-    const op = (!props.isInput)
+    const op = (!props.showShapes)
         ? <Entry>op            : {props.meta.op}</Entry>
         : <Entry>op   : {props.meta.op}</Entry>
-    const inputs = (!props.isInput)
+    const inputs = (!props.showShapes)
         ? getInputs()
         : <></>;
-    const inputShapes = (!props.isInput)
+    const inputShapes = (!props.showShapes)
         ? getShapes('_input_shapes', 'input shapes ')
         : <></>;
-    const outputShapes = (!props.isInput)
+    const outputShapes = (!props.showShapes)
         ? getShapes('_output_shapes', 'output shapes')
         : <></>;
 
