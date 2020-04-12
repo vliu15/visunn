@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 ''' contains modu class for modular topology for backend api '''
 
+import json
 from copy import deepcopy
 from pprint import pprint
 from tensorboard.compat.proto.graph_pb2 import GraphDef
@@ -11,6 +12,7 @@ from tensorboard.compat.proto.attr_value_pb2 import AttrValue
 from google.protobuf.json_format import MessageToDict, Parse
 
 from constants import MODU_ROOT
+from backend.node import Node
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -62,13 +64,13 @@ class Modu(object):
 
         def _fix_node_inputs(node):
             ''' edits node inputs to reflect modularization '''
-            for idx, input_name in enumerate(node.input):
+            for idx, input_name in enumerate(node['input']):
                 # if input comes from this module
                 if input_name.find(name) == 0:
                     sub_name = input_name[len(name):].split('/')[0]
                     # if input comes from a submodule
                     if sub_name in module['modules']:
-                        node.input[idx] = name + sub_name + '/'
+                        node['input'][idx] = name + sub_name + '/'
             return node
 
         def _add_nodes(node_type):
@@ -78,34 +80,47 @@ class Modu(object):
                 if node_type == 'op_nodes':
                     node_name = name + node_name
 
-                node = deepcopy(self._graphdict[node_name])
+                node = MessageToDict(self._graphdict[node_name])
+                node['input'] = node.get('input', [])
+                node['attr'] = node.get('attr', {})
 
                 # in_nodes are inputs to this module, so get rid of inputs
                 if node_type != 'in_nodes':
+                    for i, in_name in enumerate(node['input']):
+                        in_node = MessageToDict(self._graphdict[in_name])
+                        if '_output_shapes' in in_node['attr'].keys():
+                            node['attr']['_input_shapes_{}'.format(i)] = in_node['attr']['_output_shapes']
                     node = _fix_node_inputs(node)
                 else:
-                    while len(node.input) > 0:
-                        del node.input[0]
-                meta[node_name] = MessageToDict(node)
+                    node['input'] = []
+
+                meta[node_name] = node
 
         def _add_modules():
             ''' adds all modules to the metadata dict '''
             for submodule in module['modules']:
                 sub_name = name + submodule + '/'
                 submodule = self._modules[sub_name]
-                attr = {}
-                for i, output_shape in enumerate(submodule['out_shapes']):
-                    key = '_output_shapes_{}'.format(i)
-                    attr[key] = Parse(output_shape, AttrValue())
 
-                node = NodeDef(
-                    name=sub_name.encode(encoding='utf-8'),
-                    op='visu::module',
-                    input=list(submodule['in_nodes']),
-                    attr=attr
-                )
-                node = _fix_node_inputs(node)
-                meta[sub_name] = MessageToDict(node)
+                attr = {
+                    '_output_shapes_{}'.format(i): json.loads(output_shape)
+                    for i, output_shape in enumerate(submodule['out_shapes'])
+                }
+                attr.update({
+                    '_input_shapes_{}'.format(i): json.loads(input_shape)
+                    for i, input_shape in enumerate(submodule['in_shapes'])
+                })
+
+                node_info = {
+                    'name': sub_name,
+                    'op': 'visu::module',
+                    'input': list(submodule['in_nodes']),
+                    'output': list(submodule['out_nodes']),
+                    'attr': attr
+                }
+
+                node = _fix_node_inputs(node_info)
+                meta[sub_name] = node
 
         # convert all modules and nodes to `NodeDef` proto
         # #####################################################################

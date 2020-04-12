@@ -24,3 +24,6 @@ export const NODE_COLOR = 0x636E72;
 export const NODE_HOVER_COLOR = NODE_COLOR;
 export const NODE_SIZE = [0.5, 0.5, 0.5];
 export const NODE_TYPE = 'node';
+
+// io nodes
+export const IO_NODE_TYPE = 'IO Node';

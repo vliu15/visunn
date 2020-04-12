@@ -38,6 +38,7 @@ const Node = (props) => {
             {hover
                 ? <Label
                     meta={props.meta}
+                    isInput={props.type === C.INPUT_TYPE || props.meta.op === C.IO_NODE_TYPE}
                     x={x+2}
                     y={y+2} />
                 : <></>}
