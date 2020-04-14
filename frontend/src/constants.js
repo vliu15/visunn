@@ -1,5 +1,5 @@
 /**
- * @file constants used for rendering
+ * @file constants used for rendering three.js geometries
  * @author Vincent Liu
  */
 
@@ -19,7 +19,7 @@ export const OUTPUT_TYPE = 'output';
 // modules
 export const MODULE_COLOR = 0x6C5CE7;
 export const MODULE_HOVER_COLOR = 0x00CEC9;
-export const MODULE_SIZE = [2, 2, 2];
+export const MODULE_SIZE = [1.5, 1.5, 1.5];
 export const MODULE_TYPE = 'module';
 
 // base nodes
