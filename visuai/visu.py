@@ -34,6 +34,7 @@ class Visu(object):
 
         # [0] just get the first batch of inputs for now
         inputs, _ = next(iter(dataloader))
+        params = [name for name, _ in model.named_parameters()]
 
         # [1] use pytorch functionality to port to GraphDef proto
         # #####################################################################
@@ -83,7 +84,7 @@ class Visu(object):
         # we want to retain the modularity of the topology so that it will be
         # easy to interact with and represent as a web app
         # #####################################################################
-        self._modu = build_modu(graphdict)
+        self._modu = build_modu(graphdict, params=params)
 
         # [4] log it for later access
         if logdir == '':

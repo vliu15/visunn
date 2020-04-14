@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 ''' contains util functions to facilitate graph parsing '''
 
+import re
 from copy import copy
 from google.protobuf.json_format import MessageToJson
 
@@ -47,12 +48,14 @@ def process_nodes(graphdict):
 
             # bias and weight correspond to 'prim' ops, but should be kept
             elif input_name.split('/')[-2] in ['weight', 'bias']:
-                # edit naming scheme (and metadata) of weight nodes
+                # edit naming scheme (and metadata) of param nodes
+                graphdict.pop(input_name)
+
                 input_name = input_name.rsplit('/', 1)[0]
                 input_node.op = 'visu::param'
                 input_node.name = input_name
                 del input_node.input[0]
-                # update output node and logging
+
                 node.input[idx] = input_name
                 graphdict[input_name] = input_node
 
@@ -184,20 +187,28 @@ def build_modu(graphdict, params=None):
         modules = name.split('/')      # list of modules (directories)
         op_node = modules.pop(-1)      # node name (file)
         mod_name = md.root             # to track module's absolute path
+        param_pattern = '.'.join(re.findall(r'\[(.*?)\]', name))
 
-        # [1] add modules and weight patterns
+        # [1] add modules and param patterns
         # #####################################################################
         for module in modules:
             # add current module to previous module's list
-            md.update_module(mod_name, 'modules', module)
+            md.update(mod_name, 'modules', module)
             mod_name += module + '/'
 
             # initialize info for current module
             if mod_name not in md.modules:
-                md.add_module(mod_name)
+                md.add(mod_name)
+
+            # add params if pattern matches
+            if params is not None:
+                if param_pattern + '.weight' in params:
+                    md.update(mod_name, 'params', param_pattern + '.weight')
+                if param_pattern + '.bias' in params:
+                    md.update(mod_name, 'params', param_pattern + '.bias')
 
         # add op node to deepest nested module
-        md.update_module(mod_name, 'op_nodes', op_node)
+        md.update(mod_name, 'op_nodes', op_node)
 
         # [2] add inputs/outputs to each module (comes from another module)
         # #### 
@@ -236,14 +247,14 @@ def build_modu(graphdict, params=None):
 
                 if in_module != out_module or is_link:
                     # link inputs and outputs
-                    md.update_module(out_mod_name, 'in_nodes', in_name)
-                    md.update_module(in_mod_name, 'out_nodes', name)
+                    md.update(out_mod_name, 'in_nodes', in_name)
+                    md.update(in_mod_name, 'out_nodes', name)
                     is_link = True
 
                     # add input and output shapes
                     if out_shapes is not None:
-                        md.update_module(out_mod_name, 'in_shapes', out_shapes)
-                        md.update_module(in_mod_name, 'out_shapes', out_shapes)
+                        md.update(out_mod_name, 'in_shapes', out_shapes)
+                        md.update(in_mod_name, 'out_shapes', out_shapes)
 
             # [2.2] loop through the rest of the deeper output module
             # #################################################################
@@ -260,9 +271,9 @@ def build_modu(graphdict, params=None):
             if len(in_modules) < len(modules):
                 for idx in range(len(in_modules), len(modules)):
                     out_mod_name += modules[idx] + '/'
-                    md.update_module(out_mod_name, 'in_nodes', in_name)
+                    md.update(out_mod_name, 'in_nodes', in_name)
                     if out_shapes is not None:
-                        md.update_module(out_mod_name, 'in_shapes', out_shapes)
+                        md.update(out_mod_name, 'in_shapes', out_shapes)
             # [2.3] loop through rest of the deeper input module
             # #################################################################
             # when the input module is deeper than the output module, it must
@@ -278,8 +289,8 @@ def build_modu(graphdict, params=None):
             elif len(in_modules) > len(modules):
                 for idx in range(len(modules), len(in_modules)):
                     in_mod_name += in_modules[idx] + '/'
-                    md.update_module(in_mod_name, 'out_nodes', name)
+                    md.update(in_mod_name, 'out_nodes', name)
                     if out_shapes is not None:
-                        md.update_module(in_mod_name, 'out_shapes', out_shapes)
+                        md.update(in_mod_name, 'out_shapes', out_shapes)
 
     return md

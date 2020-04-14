@@ -31,6 +31,7 @@ const Entry = styled.p`
  * @param {int} props.x x coordinate of label
  * @param {int} props.y y coordinate of label
  * @param {bool} props.showShapes whether this label should display i/o shapes
+ * @param {bool} props.showParams whether this label should display parameters
  * @param {Object} props.meta contains metadata {name, op, (input)}
  */
 const Label = (props) => {
@@ -40,11 +41,11 @@ const Label = (props) => {
             return props.meta.input.map(
                 (element, idx) => 
                     (idx === 0)
-                        ? <Entry key={element}>inputs        : {element}</Entry>
-                        : <Entry key={element}>                {element}</Entry>
+                        ? <Entry key={idx}>inputs        : {element}</Entry>
+                        : <Entry key={idx}>                {element}</Entry>
             );
         } else {
-            return <Entry>inputs        : </Entry>;
+            return <></>;
         }
     }
 
@@ -85,8 +86,24 @@ const Label = (props) => {
         return parseShapes(props.meta.attr, keys).map(
             (element, idx) =>
                 (idx === 0)
-                    ? <Entry key={element}>{label} : {element}</Entry>
-                    : <Entry key={element}>                {element}</Entry>
+                    ? <Entry key={idx}>{label} : {element}</Entry>
+                    : <Entry key={idx}>                {element}</Entry>
+        );
+    }
+
+    // get params for the node
+    const getParams = () => {
+        // make sure this node has a param attribute
+        if (!('params') in props.meta) {
+            return <></>;
+        }
+
+        // grab the params
+        return props.meta.params.map(
+            (element, idx) => 
+            (idx === 0)
+                ? <Entry key={idx}>params        : {element}</Entry>
+                : <Entry key={idx}>                {element}</Entry>
         );
     }
 
@@ -107,6 +124,11 @@ const Label = (props) => {
         ? getShapes('_output_shapes', 'output shapes')
         : <></>;
 
+    // format dom element if the node is considered a module
+    const params = (props.showParams)
+        ? getParams()
+        : <></>;
+
     // add offset to text labels so that they aren't covering the node
     const { scene, camera } = useThree();
     const xOffset = (camera.rotation.x - scene.rotation.x > 0) ? 1 : -1
@@ -121,6 +143,7 @@ const Label = (props) => {
                 {inputs}
                 {inputShapes}
                 {outputShapes}
+                {params}
             </Metadata>
         </Dom>
     )

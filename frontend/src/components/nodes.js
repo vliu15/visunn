@@ -42,6 +42,7 @@ const Node = (props) => {
         }
     }
 
+
     return (
         <>
             {hover
@@ -51,6 +52,7 @@ const Node = (props) => {
                         props.type === C.INPUT_TYPE ||
                         props.meta.op === C.IO_NODE_TYPE ||
                         props.meta.op === C.PARAM_NODE_TYPE}
+                    showParams={props.type === C.MODULE_TYPE}
                     x={x}
                     y={y} />
                 : <></>}
@@ -97,9 +99,9 @@ const Nodes = (props) => {
     }
 
     let nodes = Object.keys(props.coords).map(
-        (name) =>
+        (name, idx) =>
             <Node
-                key={name}
+                key={idx}
                 name={name}
                 meta={props.meta[name]}
                 coords={props.coords[name]}

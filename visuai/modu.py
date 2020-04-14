@@ -21,7 +21,7 @@ class Modu(object):
         # initialize modules with root module
         self._root = root
         self._modules = {}
-        self.add_module(self._root)
+        self.add(self._root)
 
     @property
     def root(self):
@@ -33,7 +33,7 @@ class Modu(object):
         ''' retrieves names of all existing modules '''
         return self._modules.keys()
 
-    def add_module(self, name):
+    def add(self, name):
         ''' initializes a new module '''
         self._modules[name] = {
             'modules': set(),
@@ -41,13 +41,14 @@ class Modu(object):
             'in_nodes': set(),
             'in_shapes': set(),
             'out_nodes': set(),
-            'out_shapes': set()
+            'out_shapes': set(),
+            'params': set()
         }
 
-    def update_module(self, name, key, value):
+    def update(self, name, key, value):
         ''' updates the field of an existing module '''
         if name not in self.modules:
-            self.add_module(name)
+            self.add(name)
         self._modules[name][key].add(value)
 
     def export(self, name):
@@ -64,6 +65,9 @@ class Modu(object):
                     # if input comes from a submodule
                     if sub_name in module['modules']:
                         node['input'][idx] = name + sub_name + '/'
+
+            # discard duplicates from multiple inputs from same module
+            node['input'] = list(set(node['input']))
             return node
 
         def _add_nodes(node_type):
@@ -77,7 +81,7 @@ class Modu(object):
                 node['input'] = node.get('input', [])
                 node['attr'] = node.get('attr', {})
 
-                # in_nodes are inputs to this module, so get rid of inputs
+                # add input shapes (from input nodes' output shapes)
                 if node_type != 'in_nodes':
                     for i, in_name in enumerate(node['input']):
                         in_node = MessageToDict(self._graphdict[in_name])
@@ -86,6 +90,7 @@ class Modu(object):
                             key_out = '_output_shapes'
                             node['attr'][key_in] = in_node['attr'][key_out]
                     node = _fix_node_inputs(node)
+                # in_nodes are inputs to this module, so get rid of inputs
                 else:
                     node['input'] = []
 
@@ -111,9 +116,9 @@ class Modu(object):
                     'op': 'visu::module',
                     'input': list(submodule['in_nodes']),
                     'output': list(submodule['out_nodes']),
+                    'params': list(submodule['params']),
                     'attr': attr
                 }
-
                 node = _fix_node_inputs(node_info)
                 meta[sub_name] = node
 
