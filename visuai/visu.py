@@ -7,7 +7,7 @@ import pickle
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from constants import LOG_DIR, MODU_FILE
-from visuai.util import prune_nodes, prune_modules, build_modu
+from visuai.util import process_nodes, process_modules, build_modu
 from visuai.modu import Modu
 
 __author__ = 'Vincent Liu'
@@ -69,14 +69,14 @@ class Visu(object):
         # to manipulating the input tensor), which is why we discard all
         # operations of type 'prim', which are non-tensor operations
         # #####################################################################
-        graphdict = prune_nodes(graphdict)
+        graphdict = process_nodes(graphdict)
 
         # [3] prune irrelevant modules that don't contribute to the hierarchy
         # #####################################################################
         # some modules only contain one submodule or one node, and such modules
         # are uninteresting and only complicate the hierarchical structure of
         # topology, so we collapse all modules that fall into this category
-        graphdict = prune_modules(graphdict)
+        graphdict = process_modules(graphdict)
 
         # [3] modularize pruned graph topology as a filesystem
         # #####################################################################
