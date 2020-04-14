@@ -3,7 +3,6 @@
 ''' contains blueprint routing for flask app '''
 
 from copy import deepcopy
-from pprint import pprint
 from flask import Blueprint, jsonify
 
 from visuai.plot import plot
@@ -43,7 +42,7 @@ def topology_blueprint(modu):
 
         # [4] use these edges to plot and retrieve coordinates
         # #####################################################################
-        _, coords = plot(edges, normalize=True, truncate=True)
+        _, coords = plot(edges, normalize=True, truncate=False)
 
         # [5] format and export as json
         # #####################################################################
