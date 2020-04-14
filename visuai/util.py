@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 ''' contains util functions to facilitate graph parsing '''
 
+import re
 from copy import copy
 from google.protobuf.json_format import MessageToJson
 
@@ -11,10 +12,10 @@ from constants import MODU_ROOT
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
 
-__all__ = ['prune_nodes', 'prune_modules', 'build_modu']
+__all__ = ['process_nodes', 'process_modules', 'build_modu']
 
 
-def prune_nodes(graphdict):
+def process_nodes(graphdict):
     ''' prunes non-tensor operations from graph topology
 
         graphdict  (dict) : mapping of node name to NodeDef
@@ -47,12 +48,14 @@ def prune_nodes(graphdict):
 
             # bias and weight correspond to 'prim' ops, but should be kept
             elif input_name.split('/')[-2] in ['weight', 'bias']:
-                # edit naming scheme (and metadata) of weight nodes
+                # edit naming scheme (and metadata) of param nodes
+                graphdict.pop(input_name)
+
                 input_name = input_name.rsplit('/', 1)[0]
                 input_node.op = 'visu::param'
                 input_node.name = input_name
                 del input_node.input[0]
-                # update output node and logging
+
                 node.input[idx] = input_name
                 graphdict[input_name] = input_node
 
@@ -86,13 +89,14 @@ def prune_nodes(graphdict):
     return graphdict
 
 
-def prune_modules(graphdict):
-    ''' collapses modules that only contain one module or node '''
+def process_modules(graphdict):
+    ''' collapses modules with only one module/node '''
     names = list(graphdict)
 
     # [1] accumulate submodules per module
     # #########################################################################
-    # for each module, build up all submodules and nodes
+    # for each module, build track all submodules and nodes to identify which
+    # modules are "trivial" and should be collapsed
     # #########################################################################
     contents = {}
     for name in names:
@@ -101,34 +105,49 @@ def prune_modules(graphdict):
         op_node = modules.pop(-1)
 
         for module in modules:
-            if mod_name in contents.keys():
+            if mod_name in contents:
                 contents[mod_name].add(module)
             else:
                 contents[mod_name] = set([module])
             mod_name += module + '/'
-        
-        if mod_name in contents.keys():
+
+        if mod_name in contents:
             contents[mod_name].add(op_node)
         else:
             contents[mod_name] = set([op_node])
 
-    # [2] created mappings for pruned names
+    # [2] create mappings for pruned names
     # #########################################################################
     # accumulate all modules that only have 1 entry (and thus should be
     # collapsed), map them to the index of nested position so that names with
-    # the module prefix can delete the module at that position
+    # the module prefix can collapse the module at that position
+    #
+    # collapsing essentially merges the module with its child module/node by
+    # removing the '/' and putting the module in parentheses so that the
+    # modularizing code will not identify it as a module
+    #
+    # we subtract 2 to get the index to accommodate for
+    #   (1) len() is 1-indexed, and
+    #   (2) modules end in '/', so len() over-counts by 1 position
     # #########################################################################
     prune_mods = set(
-        (k, len(k.split('/'))-1) for k, v in contents.items() if len(v) <= 1
+        (k, len(k.split('/'))-2) for k, v in contents.items() if len(v) <= 1
     )
     name_map = {}
     for name in names:
-        del_idxs = set(idx for mod, idx in prune_mods if name.startswith(mod))
-        pruned_name = name.split('/')
+        map_idxs = set(idx for mod, idx in prune_mods if name.startswith(mod))
+        if len(map_idxs) == 0:
+            continue
 
-        for idx in sorted(del_idxs, reverse=True):
-            del pruned_name[idx]
-        name_map[name] = '/'.join(pruned_name)
+        mapped_name = ''
+        modules = name.split('/')
+        op_node = modules.pop(-1)
+        for idx, module in enumerate(modules):
+            if idx not in map_idxs:
+                mapped_name += module + '/'
+            else:
+                mapped_name += '(' + module + ')'
+        name_map[name] = mapped_name + op_node
 
     # [3] apply mappings to all names
     # #########################################################################
@@ -154,10 +173,12 @@ def prune_modules(graphdict):
     return graphdict
 
 
-def build_modu(graphdict):
+def build_modu(graphdict, params=None):
     ''' builds the graph topology as a file system
 
         graphdict  (dict) : mapping of node name to NodeDef
+        params     (list) : list of model parameter names (if specified, will
+                            allow for association of param names to modules)
     '''
     md = Modu(graphdict, root=MODU_ROOT)
 
@@ -166,32 +187,57 @@ def build_modu(graphdict):
         modules = name.split('/')      # list of modules (directories)
         op_node = modules.pop(-1)      # node name (file)
         mod_name = md.root             # to track module's absolute path
+        param_pattern = '.'.join(re.findall(r'\[(.*?)\]', name))
 
-        # add modules
+        # [1] add modules and param patterns
+        # #####################################################################
         for module in modules:
             # add current module to previous module's list
-            md.update_module(mod_name, 'modules', module)
+            md.update(mod_name, 'modules', module)
             mod_name += module + '/'
 
             # initialize info for current module
             if mod_name not in md.modules:
-                md.add_module(mod_name)
+                md.add(mod_name)
+
+            # add params if pattern matches
+            if params is not None:
+                if param_pattern + '.weight' in params:
+                    md.update(mod_name, 'params', param_pattern + '.weight')
+                if param_pattern + '.bias' in params:
+                    md.update(mod_name, 'params', param_pattern + '.bias')
 
         # add op node to deepest nested module
-        md.update_module(mod_name, 'op_nodes', op_node)
+        md.update(mod_name, 'op_nodes', op_node)
 
-        # add inputs/outputs to each module (comes from another module)
+        # [2] add inputs/outputs to each module (comes from another module)
+        # #### 
         for in_name in node.input:
+            # grab output shapes if present
             in_node = graphdict[in_name]
             if '_output_shapes' in in_node.attr.keys():
-                output_shapes = MessageToJson(in_node.attr['_output_shapes'])
+                out_shapes = MessageToJson(in_node.attr['_output_shapes'])
             else:
-                output_shapes = None
+                out_shapes = None
 
+            # prepare for modular linking
             in_modules = in_name.split('/')[:-1]
             in_mod_name = md.root
             out_mod_name = md.root
 
+            # [2.1] first loop within the depth of both modules
+            # #################################################################
+            # the is_link parameter tracks when the first link occurs for that
+            # module (since that must be when it is a link for all the
+            # submodules)
+            #
+            # example of a link:
+            #   node : a/b/c/d/e
+            #   input: a/b/d/e/f
+            #
+            # a/b/d/e/f is an input to modules a/b/c/, a/b/c/d/ (vice versa for 
+            # outputs)
+            # #################################################################
             is_link = False
             for idx in range(min(len(in_modules), len(modules))):
                 out_module = modules[idx]
@@ -201,27 +247,50 @@ def build_modu(graphdict):
 
                 if in_module != out_module or is_link:
                     # link inputs and outputs
-                    md.update_module(out_mod_name, 'in_nodes', in_name)
-                    md.update_module(in_mod_name, 'out_nodes', name)
-
-                    # add input and output shapes
-                    if output_shapes is not None:
-                        md.update_module(out_mod_name, 'in_shapes', output_shapes)
-                        md.update_module(in_mod_name, 'out_shapes', output_shapes)
-
+                    md.update(out_mod_name, 'in_nodes', in_name)
+                    md.update(in_mod_name, 'out_nodes', name)
                     is_link = True
 
+                    # add input and output shapes
+                    if out_shapes is not None:
+                        md.update(out_mod_name, 'in_shapes', out_shapes)
+                        md.update(in_mod_name, 'out_shapes', out_shapes)
+
+            # [2.2] loop through the rest of the deeper output module
+            # #################################################################
+            # when the output module is deeper than the input module, it must
+            # be that the input is a link to the output (and not vice versa)
+            #
+            # example of an input link:
+            #   output: a/b/c/d/e
+            #   input : a/b/c/
+            #
+            # a/b/c is an input to a/b/c/d/ and a/b/c/d/e (but those aren't
+            # outputs to a/b/c, since they reside within a/b/c)
+            # #################################################################
             if len(in_modules) < len(modules):
                 for idx in range(len(in_modules), len(modules)):
                     out_mod_name += modules[idx] + '/'
-                    md.update_module(out_mod_name, 'in_nodes', in_name)
-                    if output_shapes is not None:
-                        md.update_module(out_mod_name, 'in_shapes', output_shapes)
+                    md.update(out_mod_name, 'in_nodes', in_name)
+                    if out_shapes is not None:
+                        md.update(out_mod_name, 'in_shapes', out_shapes)
+            # [2.3] loop through rest of the deeper input module
+            # #################################################################
+            # when the input module is deeper than the output module, it must
+            # be that the output is a link to the input (and not vice versa)
+            #
+            # example of an output link:
+            #   output: a/b/c
+            #   input : a/b/c/d/e
+            #
+            # a/b/c is an output to a/b/c/d/ and a/b/c/d/e (but those aren't
+            # inputs to a/b/c, since they reside within a/b/c)
+            # #################################################################
             elif len(in_modules) > len(modules):
                 for idx in range(len(modules), len(in_modules)):
                     in_mod_name += in_modules[idx] + '/'
-                    md.update_module(in_mod_name, 'out_nodes', name)
-                    if output_shapes is not None:
-                        md.update_module(in_mod_name, 'out_shapes', output_shapes)
+                    md.update(in_mod_name, 'out_nodes', name)
+                    if out_shapes is not None:
+                        md.update(in_mod_name, 'out_shapes', out_shapes)
 
     return md

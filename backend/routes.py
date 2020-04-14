@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ''' contains blueprint routing for flask app '''
 
-from copy import deepcopy
+from pprint import pprint
 from flask import Blueprint, jsonify
 
 from visuai.plot import plot
@@ -38,7 +38,9 @@ def topology_blueprint(modu):
         edges = {}
         for name, node in meta.items():
             if 'input' in list(node):
-                edges[name] = list(node['input'])
+                edges[name] = [
+                    in_name for in_name in node['input']if in_name in meta
+                ]
 
         # [4] use these edges to plot and retrieve coordinates
         # #####################################################################
@@ -53,6 +55,7 @@ def topology_blueprint(modu):
             'inputs': inputs,
             'outputs': outputs
         }
+        pprint(module)
 
         return jsonify(module)
 

@@ -12,7 +12,7 @@ from torch.utils.tensorboard._pytorch_graph import graph
 
 from models import torch_models
 from constants import DATA_DIR
-from visuai.util import prune_nodes, prune_modules, build_modu
+from visuai.util import process_nodes, process_modules, build_modu
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -66,13 +66,13 @@ def main(args):
           .format(end - start), flush=True)
 
     start = time.time()
-    graphdict = prune_nodes(graphdict)
+    graphdict = process_nodes(graphdict)
     end = time.time()
     print('[3] prune trivial nodes: {:.3f}s'
           .format(end - start), flush=True)
 
     start = time.time()
-    graphdict = prune_modules(graphdict)
+    graphdict = process_modules(graphdict)
     end = time.time()
     print('[4] prune trivial modules: {:.3f}s'
           .format(end - start), flush=True)
