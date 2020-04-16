@@ -8,9 +8,10 @@ pydot==1.4.1
 networkx==2.4
 tensorboard==2.1.1
 
-# debugging
-matplotlib==3.2.0
-
 # backend
 flask==1.1.1
 flask-cors==3.0.8
+
+# debugging
+# matplotlib==3.2.0
+# pympler==0.8

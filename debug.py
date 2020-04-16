@@ -3,10 +3,10 @@
 ''' script for backend debugging and sanity checks '''
 
 import os
-import sys
 import time
 import argparse
 from pprint import pprint
+from pympler import asizeof
 import networkx as nx
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
@@ -64,7 +64,7 @@ def main(args):
     print('[1] convert model to protobuf: {:.3f}s'
           .format(end - start), flush=True)
     print('    protobuf footprint: {}b'
-          .format(sys.getsizeof(graphdef)), flush=True)
+          .format(asizeof.asizeof(graphdef)), flush=True)
 
     # [2] convert protobuf to dict
     start = time.time()
@@ -73,7 +73,7 @@ def main(args):
     print('[2] convert protobuf to dict: {:.3f}s'
           .format(end - start), flush=True)
     print('    dict footprint: {}b'
-          .format(sys.getsizeof(graphdict)))
+          .format(asizeof.asizeof(graphdict)))
 
     # [3] prune trivial nodes
     start = time.time()
@@ -82,7 +82,7 @@ def main(args):
     print('[3] prune trivial nodes: {:.3f}s'
           .format(end - start), flush=True)
     print('    dict footprint: {}b'
-          .format(sys.getsizeof(graphdict)))
+          .format(asizeof.asizeof(graphdict)))
 
     # [4] prune trivial modules
     start = time.time()
@@ -91,7 +91,7 @@ def main(args):
     print('[4] prune trivial modules: {:.3f}s'
           .format(end - start), flush=True)
     print('    dict footprint: {}b'
-          .format(sys.getsizeof(graphdict)))
+          .format(asizeof.asizeof(graphdict)))
 
     # [5] build modularized topology
     start = time.time()
@@ -100,7 +100,7 @@ def main(args):
     print('[5] build modularized topology: {:.3f}s'
           .format(end - start), flush=True)
     print('    modu footprint: {}b'
-          .format(sys.getsizeof(modu)))
+          .format(asizeof.asizeof(modu)))
 
     # [6] interactive plotting
     if args.shell:
@@ -115,7 +115,7 @@ def main(args):
             print('  [a] export module metadata: {:.3f}s'
                   .format(end - start))
             print('      metadata footprint: {}b'
-                  .format(sys.getsizeof((meta, inputs, outputs))))
+                  .format(asizeof.asizeof((meta, inputs, outputs))))
 
             # [b] create all edges
             start = time.time()
@@ -129,7 +129,7 @@ def main(args):
             print('  [b] create all edges: {:.3f}s'
                   .format(end - start))
             print('      edges footprint: {}b'
-                  .format(sys.getsizeof(edges)))
+                  .format(asizeof.asizeof(edges)))
 
             # [c] get node coordinates
             start = time.time()
@@ -138,7 +138,7 @@ def main(args):
             print('  [c] get node coords: {:.3f}s'
                   .format(end - start))
             print('      coords footprint: {}b'
-                  .format(sys.getsizeof(coords)))
+                  .format(asizeof.asizeof(coords)))
 
             # [d] (n/a to web app) render plt topology
             start = time.time()
@@ -152,7 +152,7 @@ def main(args):
             print('  [d] (n/a to web app) render plt topology: {:.3f}s'
                   .format(end - start))
             print('      plt topology footprint: {}b'
-                  .format(sys.getsizeof(plt)))
+                  .format(asizeof.asizeof(plt)))
 
             plt.show()
             
