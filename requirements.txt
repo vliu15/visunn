@@ -1,6 +1,6 @@
-# pytorch: models and training
-# torch==1.4.0+cpu
-# torchvision==0.5.0+cpu
+# pytorch
+torch==1.4.0+cpu
+torchvision==0.5.0+cpu
 tqdm==4.43.0
 
 # plotting
@@ -8,9 +8,13 @@ pydot==1.4.1
 networkx==2.4
 tensorboard==2.1.1
 
-# debugging
-matplotlib==3.2.0
-
 # backend
 flask==1.1.1
 flask-cors==3.0.8
+
+# debugging
+# matplotlib==3.2.0
+# pympler==0.8
+
+# some default pytorch models
+# scipy==1.4.1
