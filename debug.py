@@ -64,7 +64,7 @@ def main(args):
     print('[1] convert model to protobuf: {:.3f}s'
           .format(end - start), flush=True)
     print('    protobuf footprint: {}b'
-          .format(asizeof.asizeof(graphdef)), flush=True)
+          .format(graphdef.ByteSize()), flush=True)
 
     # [2] convert protobuf to dict
     start = time.time()

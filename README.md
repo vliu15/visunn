@@ -4,35 +4,52 @@ Visuai is a tool that leverages functional and modular visualizations to provide
  - visualization of weights and gradients throughout training
 
 ## Setup
-To be compatible with libraries such as Pytorch, the Visuai backend and user API is in Python (all `pip` dependencies can be found in `requiements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `frontend/package.json`).
+To be compatible with libraries such as Pytorch, the Visuai backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `frontend/package.json`).
 
 Support for containerized deployment with Docker is still in progress. Visuai will hopefully become a Python package so as to hide all dependencies from users and facilitate usage.
 
-## APIs
-Visuai can be interpreted as 2 separate APIs. Note that all APIs are currently only compatible with Pytorch (`torch==1.4.0`). The following examples will use the `ThreeLayerMLP` model that can be found in `models/three_layer_mlp.py`.
-
-### User API: `Visu`
-`Visu` is the API that users can use to log important information (that will later be served to the web app) and is designed to integrate easily with existing scripts with only a couple changes in code. Internally, `Visu` converts the model to GraphDef proto format, prunes unnecessarry nodes, and modularizes the topology. Currently,
+## Usage
+1. Integrate into native code
 ```python
-# Initialize Visu object with model
-visu = Visu(model, dataloader, logdir='test')
-# Log training
-visu.update(iteration, optimizer, loss)
+# Import
+from visuai import Visu
+# Initialize
+visu = Visu(model, dataloader, logdir='sample', name='model')
+```
+2. Launch web app
+```bash
+# Launch backend
+python run.py -l sample
+# Launch frontend
+cd frontend && npm start
 ```
 
-### Backend API: `Modu`
-`Modu` distills modular model topology into the format of a file system, saved in an intermediate file between when the user initializes `Visu` and accesses logged information in the web app. The saved topology is used by the backend to serve the frontend when requested by the user. Currently,
-```python
-# Initialize Modu object with GraphDef proto
-modu = Modu(proto, root='/')
-# Retrieve GraphDef proto for a specified module name
-mod_proto = modu.to_mod_proto('ThreeLayerMLP/Sequential[layers]')
-# Retrieve Graphdef proto for entire model
-flat_proto = modu.to_flat_proto()
-```
+## Metrics
+Below are time and space metrics for a few sample models. These can be obtained by running `python debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10)
+1. Convert model to protobuf (built in Pytorch function)
+2. Convert protobuf to dict
+3. Prune trivial nodes
+4. Prune trivial modules
+5. Build modularized topology
+ > Steps 1 and 3 are the largest bottlenecks in the algorithm.
+
+| Model              | Step 1   | Step 2  | Step 3  | Step 4  | Step 5  | Space     |
+|--------------------|----------|---------|---------|---------|---------|-----------|
+| ThreeLayerMLP      |  0.076 s | 0.000 s | 0.001 s | 0.000 s | 0.001 s |  19.00 kb |
+| ThreeLayerConvNet  |  0.102 s | 0.000 s | 0.001 s | 0.000 s | 0.001 s |  22.31 kb |
+| resnet18           |  1.385 s | 0.000 s | 0.014 s | 0.001 s | 0.013 s | 242.46 kb |
+| resnet152          |  8.384 s | 0.003 s | 0.329 s | 0.011 s | 0.074 s |   1.49 Mb |
+| densenet121        |  4.474 s | 0.002 s | 0.222 s | 0.021 s | 0.107 s |   1.47 Mb |
+| densenet201        |  7.568 s | 0.004 s | 0.571 s | 0.051 s | 0.292 s |   2.80 Mb |
+| googlenet          |  2.382 s | 0.001 s | 0.066 s | 0.003 s | 0.031 s | 735.41 kb |
+| shufflenet_v2_x2_0 |  2.181 s | 0.001 s | 0.100 s | 0.020 s | 0.038 s | 625.82 kb |
+| mobilenet_v2       |  1.782 s | 0.001 s | 0.053 s | 0.009 s | 0.024 s | 542.38 kb |
+| resnext101_32x8d   | 12.129 s | 0.002 s | 0.160 s | 0.007 s | 0.049 s |   1.09 Mb |
+| wide_resnet101_2   | 13.495 s | 0.002 s | 0.165 s | 0.007 s | 0.054 s |   1.10 Mb |
+| mnasnet1_3         |  1.573 s | 0.001 s | 0.050 s | 0.010 s | 0.025 s | 520.47 kb |
 
 ## Notes
-This section is dedicated to laying out next steps, including future features, bug fixes, and unaddressed nuances that come with creating a universal visualization tool.
+This section is dedicated to address nuances that come with the Pytorch backend export.
 
 ### Recycling layers
 This problem is exemplified with the following example. Consider the following variation of `ThreeLayerMLP`:
@@ -55,3 +72,6 @@ class Model(nn.Module):
         return x
 ```
 Note how `self.relu = nn.ReLU()` is reused multiple times. While this is not incorrect in any way. However, from a graph perspective, there is one `self.relu = ReLU()` node, which has multiple input and output nodes. Rendering this topology declaration will show cycles in the graph due to the multiple passes through the recycled node. A potential solution would be to split all nodes that consist of >1 unconnected graph.
+
+### Weights and Biases
+With how `torch==1.4.0` constructs the graph protobuf, it is not possible to acquire the `_output_shapes` attribute from the weights and biases nodes (recoverable for all other nodes). We thus opt to leave those fields empty when aggregating attributes.
