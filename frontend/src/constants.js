@@ -29,7 +29,7 @@ export const NODE_SIZE = [0.5, 0.5, 0.5];
 export const NODE_TYPE = 'node';
 
 // io nodes
-export const IO_NODE_TYPE = 'IO Node';
+export const IO_NODE_OP = 'IO Node';
 
 // param nodes
-export const PARAM_NODE_TYPE = 'visu::param'
+export const PARAM_NODE_OP = 'visu::param'

@@ -48,53 +48,31 @@ const Label = (props) => {
             return <></>;
         }
     }
-
-    // returns stringified i/o shapes (called from getShapes)
-    const parseShapes = (attrDict, keys) => {
-        let shapeStrs = [];
-        for (let key of keys) {
-            for (let shape of attrDict[key]['list']['shape']) {
-                let shapeStr = [];
-                for (let dim of shape['dim']) {
-                    shapeStr.push(dim['size']);
-                }
-                shapeStrs.push('[' + shapeStr.join(', ') + ']');
-            }
-        }
-        return shapeStrs;
-    }
     
     // get input/output shapes for the node
-    const getShapes = (prefix, label) => {
-        // make sure this node has an attr object
-        if (!('attr' in props.meta)) {
+    const getShapes = (key, label) => {
+        // make sure this node has an shapes
+        if (props.meta[key].length === 0) {
             return <></>;
         }
 
-        // make sure the attr object contains output shapes
-        let keys = [];
-        for (let key in props.meta.attr) {
-            if (key.startsWith(prefix)) {
-                keys.push(key);
-            }
-        }
-        if (keys.length === 0) {
-            return <></>;
+        const formatShape = (shape) => {
+            return '[' + shape.join(', ') + ']';
         }
 
         // map shapes to text entries
-        return parseShapes(props.meta.attr, keys).map(
+        return props.meta[key].map(
             (element, idx) =>
                 (idx === 0)
-                    ? <Entry key={idx}>{label} : {element}</Entry>
-                    : <Entry key={idx}>                {element}</Entry>
+                    ? <Entry key={idx}>{label} : {formatShape(element)}</Entry>
+                    : <Entry key={idx}>                {formatShape(element)}</Entry>
         );
     }
 
     // get params for the node
     const getParams = () => {
         // make sure this node has a param attribute
-        if (!('params') in props.meta) {
+        if (!('params' in props.meta)) {
             return <></>;
         }
 
@@ -108,20 +86,20 @@ const Label = (props) => {
     }
 
     // format dom elements if the node is considered an input
-    const name = (!props.showShapes)
+    const name = (props.showShapes)
         ? <Entry>name          : {props.meta.name}</Entry>
         : <Entry>name : {props.meta.name}</Entry>
-    const op = (!props.showShapes)
+    const op = (props.showShapes)
         ? <Entry>op            : {props.meta.op}</Entry>
         : <Entry>op   : {props.meta.op}</Entry>
-    const inputs = (!props.showShapes)
+    const inputs = (props.showShapes)
         ? getInputs()
         : <></>;
-    const inputShapes = (!props.showShapes)
-        ? getShapes('_input_shapes', 'input shapes ')
+    const inputShapes = (props.showShapes)
+        ? getShapes('input_shapes', 'input shapes ')
         : <></>;
-    const outputShapes = (!props.showShapes)
-        ? getShapes('_output_shapes', 'output shapes')
+    const outputShapes = (props.showShapes)
+        ? getShapes('output_shapes', 'output shapes')
         : <></>;
 
     // format dom element if the node is considered a module

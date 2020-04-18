@@ -4,7 +4,7 @@
 
 import re
 from copy import copy
-from google.protobuf.json_format import MessageToJson
+from google.protobuf.json_format import MessageToJson, MessageToDict
 
 from visuai.modu import Modu
 from constants import MODU_ROOT
@@ -15,10 +15,38 @@ __email__ = 'vliu15@stanford.edu'
 __all__ = ['process_nodes', 'process_modules', 'build_modu']
 
 
+def proto_to_dict(graphdef):
+    ''' converts the graphdef protobuf to dict '''
+    # some initialization
+    _ = {
+        'name': '',           # str         : node name
+        'op': '',             # str         : op name
+        'input': [],          # list(str)   : list of input names
+        'output_shapes': []   # list(tuple) : list of shape tuples
+    }
+
+    graphdict = {}
+    for node in graphdef.node:
+        node = MessageToDict(node)
+        graphdict[node['name']] = {
+            'name': node.get('name', ''),
+            'op': node.get('op', ''),
+            'input': node.get('input', ''),
+            'output_shapes': []
+        }
+        if '_output_shapes' in node['attr']:
+            for shape in node['attr']['_output_shapes']['list']['shape']:
+                graphdict[node['name']]['output_shapes'].append(
+                    tuple(int(dim['size']) for dim in shape['dim'])
+                )
+
+    return graphdict
+
+
 def process_nodes(graphdict):
     ''' prunes non-tensor operations from graph topology
 
-        graphdict  (dict) : mapping of node name to NodeDef
+        graphdict  (dict) : mapping of node name to nodedict
 
         graphdict will serve as the master representation of the model topology
         and will reflect the removal of nodes in the pruning process
@@ -26,7 +54,7 @@ def process_nodes(graphdict):
     # get list of output nodes
     outputs = set(graphdict.keys())
     for name, node in graphdict.items():
-        outputs = outputs.difference(set(node.input))
+        outputs = outputs.difference(set(node['input']))
 
     # initialize bfs
     queue = [graphdict[name] for name in outputs]
@@ -34,12 +62,12 @@ def process_nodes(graphdict):
 
     while len(queue) > 0:
         node = queue.pop(0)
-        seen.add(node.name)
+        seen.add(node['name'])
         contains_prim = False
 
         del_idxs = []
         # for each input, merge its inputs if 'prim'
-        for idx, input_name in enumerate(node.input):
+        for idx, input_name in enumerate(node['input']):
             input_node = graphdict.get(input_name, None)
 
             # torch==1.4.0: delete nodes not in graphdef
@@ -49,20 +77,20 @@ def process_nodes(graphdict):
             # bias and weight correspond to 'prim' ops, but should be kept
             elif input_name.split('/')[-2] in ['weight', 'bias']:
                 # edit naming scheme (and metadata) of param nodes
-                graphdict.pop(input_name)
-
+                del graphdict[input_name]
                 input_name = input_name.rsplit('/', 1)[0]
-                input_node.op = 'visu::param'
-                input_node.name = input_name
-                del input_node.input[0]
-
-                node.input[idx] = input_name
-                graphdict[input_name] = input_node
+                graphdict[input_name] = {
+                    'name': input_name,
+                    'op': 'visu::param',
+                    'input': [],
+                    'output_shapes': input_node['output_shapes']
+                }
+                node['input'][idx] = input_name
 
             # all other prim ops should be removed
-            elif input_node.op.split('::')[0] == 'prim':
+            elif input_node['op'].split('::')[0] == 'prim':
                 del_idxs.append(idx)
-                node.input.extend(input_node.input)
+                node['input'].extend(input_node['input'])
                 contains_prim = True
 
             # if input is still there, queue it
@@ -71,10 +99,10 @@ def process_nodes(graphdict):
 
         # delete inputs from node
         for idx in reversed(del_idxs):
-            del node.input[idx]
+            del node['input'][idx]
 
         # update node in graphdict
-        graphdict[node.name] = node
+        graphdict[node['name']] = node
 
         # if 'prim' inputs were removed, re-queue and re-evaluate
         if contains_prim:
@@ -83,7 +111,7 @@ def process_nodes(graphdict):
     # remove those nodes from the graphdict
     for name in list(graphdict):
         node = graphdict[name]
-        if node.op.split('::')[0] == 'prim':
+        if node['op'].split('::')[0] == 'prim':
             graphdict.pop(name)
 
     return graphdict
@@ -133,6 +161,7 @@ def process_modules(graphdict):
     prune_mods = set(
         (k, len(k.split('/'))-2) for k, v in contents.items() if len(v) <= 1
     )
+
     name_map = {}
     for name in names:
         map_idxs = set(idx for mod, idx in prune_mods if name.startswith(mod))
@@ -154,18 +183,18 @@ def process_modules(graphdict):
     # edit all node names (inputs included) in the graphdict
     # NOTE: not sure if applying name changes here is the most efficient
     # #########################################################################
-    for name in list(graphdict):
+    for name in names:
         node = graphdict.pop(name)
 
         # update name if edited
         if name in name_map:
             name = name_map[name]
-            node.name = name
+            node['name'] = name
 
         # update input names if edited
-        for idx, in_node in enumerate(node.input):
+        for idx, in_node in enumerate(node['input']):
             if in_node in name_map:
-                node.input[idx] = name_map[in_node]
+                node['input'][idx] = name_map[in_node]
 
         # update node entry in graphdict
         graphdict[name] = node
@@ -176,7 +205,7 @@ def process_modules(graphdict):
 def build_modu(graphdict, params=None):
     ''' builds the graph topology as a file system
 
-        graphdict  (dict) : mapping of node name to NodeDef
+        graphdict  (dict) : mapping of node name to nodedict
         params     (list) : list of model parameter names (if specified, will
                             allow for association of param names to modules)
     '''
@@ -211,14 +240,11 @@ def build_modu(graphdict, params=None):
         md.update(mod_name, 'op_nodes', op_node)
 
         # [2] add inputs/outputs to each module (comes from another module)
-        # #### 
-        for in_name in node.input:
-            # grab output shapes if present
+        # #####################################################################
+        for in_name in node['input']:
+            # grab output shapes
             in_node = graphdict[in_name]
-            if '_output_shapes' in in_node.attr.keys():
-                out_shapes = MessageToJson(in_node.attr['_output_shapes'])
-            else:
-                out_shapes = None
+            out_shapes = in_node['output_shapes']
 
             # prepare for modular linking
             in_modules = in_name.split('/')[:-1]
@@ -252,9 +278,9 @@ def build_modu(graphdict, params=None):
                     is_link = True
 
                     # add input and output shapes
-                    if out_shapes is not None:
-                        md.update(out_mod_name, 'in_shapes', out_shapes)
-                        md.update(in_mod_name, 'out_shapes', out_shapes)
+                    for out_shape in out_shapes:
+                        md.update(out_mod_name, 'in_shapes', out_shape)
+                        md.update(in_mod_name, 'out_shapes', out_shape)
 
             # [2.2] loop through the rest of the deeper output module
             # #################################################################
@@ -272,8 +298,9 @@ def build_modu(graphdict, params=None):
                 for idx in range(len(in_modules), len(modules)):
                     out_mod_name += modules[idx] + '/'
                     md.update(out_mod_name, 'in_nodes', in_name)
-                    if out_shapes is not None:
-                        md.update(out_mod_name, 'in_shapes', out_shapes)
+                    for out_shape in out_shapes:
+                        md.update(out_mod_name, 'in_shapes', out_shape)
+
             # [2.3] loop through rest of the deeper input module
             # #################################################################
             # when the input module is deeper than the output module, it must
@@ -290,7 +317,7 @@ def build_modu(graphdict, params=None):
                 for idx in range(len(modules), len(in_modules)):
                     in_mod_name += in_modules[idx] + '/'
                     md.update(in_mod_name, 'out_nodes', name)
-                    if out_shapes is not None:
-                        md.update(in_mod_name, 'out_shapes', out_shapes)
+                    for out_shape in out_shapes:
+                        md.update(in_mod_name, 'out_shapes', out_shape)
 
     return md
