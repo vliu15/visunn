@@ -7,7 +7,8 @@ import pickle
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from constants import LOG_DIR, MODU_FILE
-from visuai.util import process_nodes, process_modules, build_modu
+from visuai.util import proto_to_dict, process_nodes, process_modules, \
+                        build_modu
 from visuai.modu import Modu
 
 __author__ = 'Vincent Liu'
@@ -36,7 +37,7 @@ class Visu(object):
         inputs, _ = next(iter(dataloader))
         params = [name for name, _ in model.named_parameters()]
 
-        # [1] use pytorch functionality to port to GraphDef proto
+        # [1] use pytorch functionality to port to graphdef proto
         # #####################################################################
         # `graph` function:
         #   https://github.com/pytorch/...
@@ -48,20 +49,24 @@ class Visu(object):
         #   from tensorboard.compat.proto.graph_pb2 import GraphDef
         #   fields: ['node', 'versions', 'version' (deprecated), 'library']
         #
+        # NOTE: see note on recycled layers in README.md
+        # #####################################################################
+        graphdef, _ = graph(model, inputs)
+
+        # [2] convert and parse graphdef proto to dict format
+        # #####################################################################
+        # this maps the name of a node to its relevant contents, saving space
+        # and improving accessibility for downstream processing
+        #
         # `NodeDef` protobuf:
         #   https://github.com/tensorflow/...
         #       tensorflow/blob/master/tensorflow/core/framework/node_def.proto
         #   from tensorboard.compat.proto.node_def_pb2 import NodeDef
         #   fields: ['name', 'op', 'input', 'device', 'attr']
-        #
-        # consider adjusting code block here to get desired naming scheme
-        #
-        # NOTE: see note on recycled layers in README.md
         # #####################################################################
-        graphdef, _ = graph(model, inputs)
-        graphdict = {node.name: node for node in graphdef.node}
+        graphdict = proto_to_dict(graphdef)
 
-        # [2] use bfs to prune nodes of op type 'prim'
+        # [3] use bfs to prune nodes of op type 'prim'
         # #####################################################################
         # tensor basics:
         #   https://pytorch.org/cppdocs/notes/tensor_basics.html
@@ -72,29 +77,34 @@ class Visu(object):
         # #####################################################################
         graphdict = process_nodes(graphdict)
 
-        # [3] prune irrelevant modules that don't contribute to the hierarchy
+        # [4] prune irrelevant modules that don't contribute to the hierarchy
         # #####################################################################
         # some modules only contain one submodule or one node, and such modules
         # are uninteresting and only complicate the hierarchical structure of
         # topology, so we collapse all modules that fall into this category
+        # #####################################################################
         graphdict = process_modules(graphdict)
 
-        # [3] modularize pruned graph topology as a filesystem
+        # [5] modularize pruned graph topology as a filesystem
         # #####################################################################
         # we want to retain the modularity of the topology so that it will be
         # easy to interact with and represent as a web app
         # #####################################################################
         self._modu = build_modu(graphdict, params=params)
+        from pprint import pprint
+        pprint(self._modu._graphdict)
 
-        # [4] log it for later access
+        # [6] log it for later access
         if logdir == '':
             logdir = 'test'
         logdir = os.path.join(LOG_DIR, logdir)
+
         # NOTE: uncomment to disallow collisions
         # #####################################################################
         # if os.path.exists(logdir) and os.path.isdir(logdir):
         #     raise OSError('The directory {} already exists.')
         # #####################################################################
+
         if os.path.exists(logdir):
             import shutil
             shutil.rmtree(logdir)
@@ -107,7 +117,7 @@ class Visu(object):
               .format(name), flush=True)
         os._exit(0)
 
-    # NOTE: see https://www.wandb.com for this functionality
+    # NOTE: see https://www.wandb.com for this intended functionality
     def update(self, iter, optim, loss):
         ''' logs updates to the model
 

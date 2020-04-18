@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 ''' contains modu class for modular topology for backend api '''
 
-import json
-from google.protobuf.json_format import MessageToDict
+from copy import deepcopy
 
 from constants import MODU_ROOT
 
@@ -77,18 +76,14 @@ class Modu(object):
                 if node_type == 'op_nodes':
                     node_name = name + node_name
 
-                node = MessageToDict(self._graphdict[node_name])
-                node['input'] = node.get('input', [])
-                node['attr'] = node.get('attr', {})
+                node = deepcopy(self._graphdict[node_name])
+                node['input_shapes'] = []
 
                 # add input shapes (from input nodes' output shapes)
                 if node_type != 'in_nodes':
-                    for i, in_name in enumerate(node['input']):
-                        in_node = MessageToDict(self._graphdict[in_name])
-                        if '_output_shapes' in in_node['attr'].keys():
-                            key_in = '_input_shapes_{}'.format(i)
-                            key_out = '_output_shapes'
-                            node['attr'][key_in] = in_node['attr'][key_out]
+                    for in_name in node['input']:
+                        in_node = self._graphdict[in_name]
+                        node['input_shapes'] += in_node['output_shapes']
                     node = _fix_node_inputs(node)
                 # in_nodes are inputs to this module, so get rid of inputs
                 else:
@@ -102,24 +97,17 @@ class Modu(object):
                 sub_name = name + submodule + '/'
                 submodule = self._modules[sub_name]
 
-                attr = {
-                    '_output_shapes_{}'.format(i): json.loads(output_shape)
-                    for i, output_shape in enumerate(submodule['out_shapes'])
-                }
-                attr.update({
-                    '_input_shapes_{}'.format(i): json.loads(input_shape)
-                    for i, input_shape in enumerate(submodule['in_shapes'])
-                })
-
                 node_info = {
                     'name': sub_name,
                     'op': 'visu::module',
                     'input': list(submodule['in_nodes']),
                     'output': list(submodule['out_nodes']),
-                    'params': list(submodule['params']),
-                    'attr': attr
+                    'input_shapes': list(submodule['in_shapes']),
+                    'output_shapes': list(submodule['out_shapes']),
+                    'params': sorted(submodule['params'])
                 }
                 node = _fix_node_inputs(node_info)
+
                 meta[sub_name] = node
 
         # convert all modules and nodes to dict

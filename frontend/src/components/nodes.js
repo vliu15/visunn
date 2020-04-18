@@ -49,9 +49,10 @@ const Node = (props) => {
                 ? <Label
                     meta={props.meta}
                     showShapes={
-                        props.type === C.INPUT_TYPE ||
-                        props.meta.op === C.IO_NODE_TYPE ||
-                        props.meta.op === C.PARAM_NODE_TYPE}
+                        props.type !== C.INPUT_TYPE &&
+                        props.type !== C.OUTPUT_TYPE &&
+                        props.meta.op !== C.IO_NODE_OP &&
+                        props.meta.op !== C.PARAM_NODE_OP}
                     showParams={props.type === C.MODULE_TYPE}
                     x={x}
                     y={y} />
