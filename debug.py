@@ -16,7 +16,8 @@ from torch.utils.tensorboard._pytorch_graph import graph
 from models import torch_models
 from constants import DATA_DIR
 from visuai.plot import plot
-from visuai.util import process_nodes, process_modules, build_modu
+from visuai.util import proto_to_dict, process_nodes, process_modules, \
+                        build_modu
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -68,7 +69,7 @@ def main(args):
 
     # [2] convert protobuf to dict
     start = time.time()
-    graphdict = {node.name: node for node in graphdef.node}
+    graphdict = proto_to_dict(graphdef)
     end = time.time()
     print('[2] convert protobuf to dict: {:.3f}s'
           .format(end - start), flush=True)

@@ -4,7 +4,7 @@
 
 import re
 from copy import copy
-from google.protobuf.json_format import MessageToJson, MessageToDict
+from google.protobuf.json_format import MessageToDict
 
 from visuai.modu import Modu
 from constants import MODU_ROOT
@@ -12,7 +12,7 @@ from constants import MODU_ROOT
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
 
-__all__ = ['process_nodes', 'process_modules', 'build_modu']
+__all__ = ['process_nodes', 'process_modules', 'build_modu', 'proto_to_dict']
 
 
 def proto_to_dict(graphdef):
@@ -224,10 +224,6 @@ def build_modu(graphdict, params=None):
             # add current module to previous module's list
             md.update(mod_name, 'modules', module)
             mod_name += module + '/'
-
-            # initialize info for current module
-            if mod_name not in md.modules:
-                md.add(mod_name)
 
             # add params if pattern matches
             if params is not None:

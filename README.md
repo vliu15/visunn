@@ -1,7 +1,5 @@
 # Visuai: Aesthetic and Informative Visualizations of Neural Networks
-Visuai is a tool that leverages functional and modular visualizations to provide a suite of useful debugging tools that would otherwise have high barrier to usability. Some basic functionality that Visuai provides currently includes:
- - (modular) visualization of neural networks
- - visualization of weights and gradients throughout training
+Visuai is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures.
 
 ## Setup
 To be compatible with libraries such as Pytorch, the Visuai backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `frontend/package.json`).
@@ -25,13 +23,13 @@ cd frontend && npm start
 ```
 
 ## Metrics
-Below are time and space metrics for a few sample models. These can be obtained by running `python debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10)
+Below are time and space metrics for a few sample models. These can be obtained by running `python debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
+ > Steps 1 and 3 are the largest bottlenecks in the algorithm.
 1. Convert model to protobuf (built in Pytorch function)
 2. Convert protobuf to dict
 3. Prune trivial nodes
 4. Prune trivial modules
 5. Build modularized topology
- > Steps 1 and 3 are the largest bottlenecks in the algorithm.
 
 | Model              | Step 1   | Step 2  | Step 3  | Step 4  | Step 5  | Space     |
 |--------------------|----------|---------|---------|---------|---------|-----------|
@@ -51,8 +49,8 @@ Below are time and space metrics for a few sample models. These can be obtained 
 ## Notes
 This section is dedicated to address nuances that come with the Pytorch backend export.
 
-### Recycling layers
-This problem is exemplified with the following example. Consider the following variation of `ThreeLayerMLP`:
+### Recycled Layers
+This problem is exemplified with the following following variation of `ThreeLayerMLP`:
 ```python
 class Model(nn.Module):
     def __init__(self, num_classes=10, **kwargs):

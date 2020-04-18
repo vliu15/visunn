@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 ''' contains modu class for modular topology for backend api '''
 
-import json
 from copy import deepcopy
 
 from constants import MODU_ROOT
@@ -54,8 +53,6 @@ class Modu(object):
     def export(self, name):
         ''' exports the metadata of the specified module as a dict '''
         module = self._modules[name]
-        from pprint import pprint
-        pprint(self._graphdict)
         meta = {}
 
         def _fix_node_inputs(node):

@@ -7,7 +7,8 @@ import pickle
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from constants import LOG_DIR, MODU_FILE
-from visuai.util import process_nodes, process_modules, build_modu, proto_to_dict
+from visuai.util import proto_to_dict, process_nodes, process_modules, \
+                        build_modu
 from visuai.modu import Modu
 
 __author__ = 'Vincent Liu'
@@ -81,6 +82,7 @@ class Visu(object):
         # some modules only contain one submodule or one node, and such modules
         # are uninteresting and only complicate the hierarchical structure of
         # topology, so we collapse all modules that fall into this category
+        # #####################################################################
         graphdict = process_modules(graphdict)
 
         # [5] modularize pruned graph topology as a filesystem
@@ -115,7 +117,7 @@ class Visu(object):
               .format(name), flush=True)
         os._exit(0)
 
-    # NOTE: see https://www.wandb.com for this functionality
+    # NOTE: see https://www.wandb.com for this intended functionality
     def update(self, iter, optim, loss):
         ''' logs updates to the model
 
