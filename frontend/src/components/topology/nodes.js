@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 
 import Label from './labels';
-import * as C from '../constants';
+import * as C from '../../constants';
 
 
 /**
@@ -14,11 +14,11 @@ import * as C from '../constants';
  * 
  * @param {string} props.type value indicating the type of node
  * @param {Array} props.coords an array of (x,y) coordinates
- * @param {function} props.tagHandler callback used to update parent state
  * @param {string} props.name name of the module this node corresponds to
  * @param {Object} props.meta mapping of {name, op, input, attr} to its values
  */
 const Node = (props) => {
+    const [x, y] = props.coords;
     let [hover, setHover] = useState(false);
 
     // node colors and size
@@ -32,28 +32,41 @@ const Node = (props) => {
                     : [C.NODE_COLOR, C.NODE_HOVER_COLOR, C.NODE_SIZE]
     );
 
-    // node position
-    const [x, y] = props.coords;
-
-    // parent state update handler
-    const onClickHandler = (e) => {
-        if (props.type === C.MODULE_TYPE) {
-            return props.tagHandler(props.name);
+    const onClick = () => {
+        // only modules should have clickable actions
+        if (props.type !== C.MODULE_TYPE) {
+            return false;
         }
+        let host = window.location.hostname;
+        let port = window.location.port;
+        let href = 'http://' + host + ':' + port + '/' + props.name.slice(0, -1);
+        window.location.href = href;
+        return true;
     }
 
+    const onPointerOver = (e) => {
+        setHover(true);
+        if (props.type === C.MODULE_TYPE) {
+            document.body.style.cursor = 'pointer';
+        }
+        props.setName(props.name);
+        return true;
+    }
+
+    const onPointerOut = (e) => {
+        setHover(false);
+        if (props.type === C.MODULE_TYPE) {
+            document.body.style.cursor = 'default';
+        }
+        return true;
+    }
 
     return (
         <>
             {hover
                 ? <Label
-                    meta={props.meta}
-                    showShapes={
-                        props.type !== C.INPUT_TYPE &&
-                        props.type !== C.OUTPUT_TYPE &&
-                        props.meta.op !== C.IO_NODE_OP &&
-                        props.meta.op !== C.PARAM_NODE_OP}
-                    showParams={props.type === C.MODULE_TYPE}
+                    name={props.meta.name}
+                    op={props.meta.op}
                     x={x}
                     y={y} />
                 : <></>}
@@ -61,9 +74,9 @@ const Node = (props) => {
                 position={[x, y, 0]}
                 rotation={[0, 0, 0]}
                 receiveShadow={true}
-                onClick={onClickHandler}
-                onPointerOver={() => setHover(true)}
-                onPointerOut={() => setHover(false)}>
+                onClick={onClick}
+                onPointerOver={onPointerOver}
+                onPointerOut={onPointerOut}>
                 <boxGeometry
                     attach='geometry'
                     args={size}
@@ -84,7 +97,6 @@ const Node = (props) => {
  * @param {Array} props.outputs list of output node names
  * @param {Object} props.coords mapping of name to (x,y) coordinates
  * @param {Object} props.meta mapping of name to metadata Object
- * @param {function} props.tagHandler callback to update parent state
  */
 const Nodes = (props) => {
     const type = (name) => {
@@ -107,7 +119,7 @@ const Nodes = (props) => {
                 meta={props.meta[name]}
                 coords={props.coords[name]}
                 type={type(name)}
-                tagHandler={props.tagHandler} />
+                setName={props.setName} />
     );
     return nodes;
 }

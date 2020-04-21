@@ -3,44 +3,95 @@
  * @author Vincent Liu
  */
 
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import './App.css';
 
-import { Toolbar, Title, Header } from './components/toolbar';
+import Sidebar from './containers/sidebar';
 import Topology from './containers/topology';
+import * as C from './constants';
+import { ROOT } from './constants';
 
+
+export const AppContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100vw;
+    height: 100vh;
+`
 
 const App = () => {
-    let [tag, setTag] = useState('root');
+    // retrieve the metadata corresponding to tag
+    useEffect(() => {
+        const getConfig = async () => {
+            let tag = window.location.pathname;
+            if (tag === '/') {
+                tag += ROOT;
+            } else {
+                tag = '/' + tag.slice(1).replace(/\//g, ';');
+            }
 
-    const updateTag = async (newTag) => {
-        setTag(newTag);
+            let config = await fetch('http://127.0.0.1:5000/topology' + tag);
+            let json = await config.json();
+            setConfig(json);
+            setReady(true);
+        }
+
+        getConfig();
+    }, []);
+
+    // add event listeners
+    useEffect(() => {
+        window.addEventListener('mousedown', (e) => {
+            if (!e) {
+                e = window.event;
+            }
+            if (e.target && e.target.tagName === 'CANVAS') {
+                setRotation(false);
+            }
+            setPosition(false);
+        })
+    })
+
+    const type = (name) => {
+        if (name === null) {
+            return '';
+        }
+        if (name.slice(-1) === '/') {
+            return C.MODULE_TYPE;
+        } else if (config.inputs.includes(name)) {
+            return C.INPUT_TYPE;
+        } else if (config.outputs.includes(name)) {
+            return C.OUTPUT_TYPE;
+        } else {
+            return C.NODE_TYPE;
+        }
     }
+
+    let [ready, setReady] = useState(false);
+    let [config, setConfig] = useState({});
+    let [rotation, setRotation] = useState(true);
+    let [position, setPosition] = useState(false);
+    let [name, setName] = useState(null);
 
     return (
         <div className='App'>
-            <Router>
-                <Toolbar>
-                    <Link to='/' style={{textDecoration: 'none'}}>
-                        <Title>v i s u a i</Title>
-                    </Link>
-                    <Link to='/topology' style={{textDecoration: 'none'}}>
-                        <Header onClick={() => setTag('root')}>topology</Header>
-                    </Link>
-                    <Link to='/metrics' style={{textDecoration: 'none'}}>
-                        <Header>metrics</Header>
-                    </Link>
-                </Toolbar>
-
-                <Switch>
-                    <Route exact path='/' />
-                    <Route path='/topology'>
-                        <Topology tag={tag} tagHandler={updateTag} />
-                    </Route>
-                    <Route path='/metrics' />
-                </Switch>
-            </Router>
+            <AppContainer>
+                <Sidebar
+                    hasPrevious={window.location.pathname !== '/'}
+                    setRotation={setRotation}
+                    setPosition={setPosition}
+                    meta={(ready && name !== null) ? config.meta[name] : null}
+                    type={(type(name))} />
+                {ready
+                    ? <Topology
+                        rotation={rotation}
+                        position={position}
+                        config={config}
+                        setName={setName} />
+                    : <></>}
+            </AppContainer>
         </div>
     );
 }

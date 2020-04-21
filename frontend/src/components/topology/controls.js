@@ -3,7 +3,7 @@
  * @author Vincent Liu
  */
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useThree, useFrame, extend } from 'react-three-fiber';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -12,24 +12,24 @@ extend({ OrbitControls });
 
 /**
  * component for camera orbitcontrols for three.js
- * 
- * @param {string} props.tag global module tag, tracked to set default rotation
  */
-function Controls(props) {
-    // allow user to stop rotation by clicking
-    window.addEventListener('mousedown', () => setClicked(true));
-
-    // state control (for auto rotation)
-    const [, setTag] = useState();
-    const [clicked, setClicked] = useState(false);
-
+const Controls = (props) => {
     const controls = useRef();
     const { camera, scene, gl } = useThree();
 
+    if (props.position) {
+        camera.position.x = 0;
+        camera.position.y = 0;
+        camera.position.z = 25;
+        scene.rotation.x = 0;
+        scene.rotation.y = 0;
+        scene.rotation.z = 0;
+    }
+
     // update controls / rotation
-    useFrame(() => controls.current.update());
     useFrame(() => {
-        if (!clicked) {
+        controls.current.update();
+        if (props.rotation) {
             scene.rotation.y += 0.01;
             if (scene.rotation.y > 2 * Math.PI) {
                 scene.rotation.y -= 2 * Math.PI;
@@ -37,20 +37,17 @@ function Controls(props) {
         }
     });
 
-    // reset click state when tag changes
-    useEffect(() => {
-        setTag(props.tag);
-        setClicked(false);
-    }, [props.tag]);
-
     return (
         <orbitControls
             ref={controls}
             args={[camera, gl.domElement]} 
             enableKeys={true}
             enableDamping={true}
+            enablePan={false}
             dampingFactor={0.1}
-            rotateSpeed={0.75} />
+            rotateSpeed={0.75}
+            maxPolarAngle={Math.PI * 5/8}
+            minPolarAngle={Math.PI * 1/8} />
     )
 }
 
