@@ -27,7 +27,7 @@ def topology_blueprint(modu):
         if tag == 'root':
             module = modu.root
         else:
-            module = tag.replace(';', '/')
+            module = tag.replace(';', '/') + '/'
 
         # [2] retrieve metadata from modu
         # #####################################################################

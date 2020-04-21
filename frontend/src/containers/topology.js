@@ -3,69 +3,52 @@
  * @author Vincent Liu
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import styled from 'styled-components';
 import { Canvas } from 'react-three-fiber';
 
-import CanvasContainer from '../components/canvas';
-import Nodes from '../components/nodes';
-import Edges from '../components/edges';
-import Controls from '../components/controls';
+import Nodes from '../components/topology/nodes';
+import Edges from '../components/topology/edges';
+import Controls from '../components/topology/controls';
 
+
+const Container = styled.div`
+    position: relative;
+    max-height: 100vh;
+    max-width: calc(100vw - 25em);
+    width: 100%;
+    height: 100%;
+`
 
 /**
  * returns the canvas and all its elements draw on it
  * 
- * @param {string} props.tag name of the module currently rendered
- * @param {function} props.tagHandler callback used to update the parent state
+ * @param {Object} props.config config data from backend
  */
 const Topology = (props) => {
-    let [ready, setReady] = useState(false);
-    let [config, setConfig] = useState({});
-
-    // retrieves the metadata corresponding to tag every time tag changes;
-    useEffect(() => {
-        const getConfig = async () => {
-            let tag = props.tag.replace(/\//g, ';');
-            let config = await fetch('http://127.0.0.1:5000/topology/' + tag);
-            let json = await config.json();
-            setConfig(json);
-            setReady(true);
-        }
-
-        getConfig();
-    }, [props.tag]);
-
-    const updateTagHandler = (newTag) => {
-        props.tagHandler(newTag)
-    }
-
-    let graph = [];
-    if (ready) {
-        graph = [
-            <Nodes
-                key={'nodes'}
-                meta={config.meta}
-                coords={config.coords}
-                inputs={config.inputs}
-                outputs={config.outputs}
-                tag={props.tag}
-                tagHandler={updateTagHandler} />,
-            <Edges key={'edges'} coords={config.coords} edges={config.edges} />
-        ];
-    }
-
     return (
-        <CanvasContainer>
+        <Container>
             <Canvas
                 camera={{position: [0, 0, 25]}}
                 gl={{physicallyCorrectLights: true}}>
                 <ambientLight />
-                <pointLight position={[0, 0, 5000]} castShadow={true} />
-                <pointLight position={[5000, 0, 0]} castShadow={true} />
-                <Controls tag={props.tag}/>
-                {graph}
+                <pointLight position={[0, 0, 5000]} intensity={0.75} castShadow={true} />
+                <pointLight position={[5000, 0, 0]} intensity={0.5} castShadow={true} />
+                <Controls rotation={props.rotation} tag={props.tag} position={props.position} />
+
+                <Nodes
+                    key={'nodes'}
+                    meta={props.config.meta}
+                    coords={props.config.coords}
+                    inputs={props.config.inputs}
+                    outputs={props.config.outputs}
+                    setName={props.setName} />
+                <Edges
+                    key={'edges'}
+                    coords={props.config.coords}
+                    edges={props.config.edges} />
             </Canvas>
-        </CanvasContainer>
+        </Container>
     )
 }
 

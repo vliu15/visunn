@@ -3,6 +3,8 @@
  * @author Vincent Liu
  */
 
+// root
+export const ROOT = 'root';
 
 // input nodes
 export const INPUT_COLOR = 0xFDCB6E;
