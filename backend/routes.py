@@ -32,6 +32,14 @@ def topology_blueprint(modu):
         # [2] retrieve metadata from modu
         # #####################################################################
         meta, inputs, outputs = modu.export(module)
+        # revise inputs/outputs for root module
+        if tag == 'root':
+            inputs, outputs = [], []
+            for name, node in meta.items():
+                if len(node['input']) == 0:
+                    inputs += [name]
+                if len(node['output']) == 0:
+                    outputs += [name]
 
         # [3] accumulate edges between nodes
         # #####################################################################

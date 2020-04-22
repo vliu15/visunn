@@ -21,7 +21,7 @@ const Instructions = () => {
     return (
         <Card style={{overflow: 'visible'}}>
             <Entry>
-                <Title>visuai: how to</Title>
+                <Title><strong>visuai</strong>: how to</Title>
             </Entry>
             <Entry>
                 <Info><strong>hover</strong> over a node to display its info below</Info>
