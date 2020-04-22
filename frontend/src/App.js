@@ -9,6 +9,7 @@ import './App.css';
 
 import Sidebar from './containers/sidebar';
 import Topology from './containers/topology';
+import VincentJianLiu from './containers/vincentjianliu';
 import * as C from './constants';
 import { ROOT } from './constants';
 
@@ -91,6 +92,7 @@ const App = () => {
                         config={config}
                         setName={setName} />
                     : <></>}
+                <VincentJianLiu />
             </AppContainer>
         </div>
     );

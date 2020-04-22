@@ -19,7 +19,7 @@ export const OUTPUT_SIZE = INPUT_SIZE;
 export const OUTPUT_TYPE = 'output';
 
 // modules
-export const MODULE_COLOR = 0x6C5CE7;
+export const MODULE_COLOR = 0x4834D4;
 export const MODULE_HOVER_COLOR = 0xEB4D4B;
 export const MODULE_SIZE = [1.5, 1.5, 1.5];
 export const MODULE_TYPE = 'module';

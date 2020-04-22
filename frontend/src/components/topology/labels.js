@@ -7,21 +7,17 @@ import React from 'react';
 import styled from 'styled-components';
 import { Dom, useThree } from 'react-three-fiber';
 
+import { Info } from '../text';
+
+
 // metadata container
 const Container = styled.div`
     text-align: left;
     white-space: pre;
     background-color: #DFF9FB;
-    padding: 5px;
+    padding: 0.5em;
     border: 1px solid #C7ECEE;
-    border-radius: 2px;
-`
-
-// line entry in metadata
-const Info = styled.p`
-    font-size: small;
-    padding: 0;
-    margin: 0;
+    border-radius: 5px;
 `
 
 /**
@@ -50,7 +46,7 @@ const Label = (props) => {
                 line += '/';
             }
             formatted.push(
-                <Info>{line}</Info>
+                <Info key={i}>{line}</Info>
             );
         }
         return formatted;

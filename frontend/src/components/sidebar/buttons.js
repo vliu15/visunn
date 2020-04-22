@@ -37,6 +37,7 @@ const Container = styled.div`
     order: 1;
     align-items: center;
     justify-content: center;
+    margin-bottom: 1em;
 `
 
 const Buttons = (props) => {

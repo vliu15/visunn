@@ -1,29 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { Title, Header, Info } from '../text';
+import { InlineInfo, Entry, Card } from '../div';
 import * as C from '../../constants';
-
-/* styled text */
-const Title = styled.h2`
-    font-size: large;
-    word-wrap: break-word;
-    margin: 0;
-`
-
-const Info = styled.p`
-    font-size: small;
-    word-wrap: break-word;
-    padding: 0;
-    margin: 0;
-`
-
-const BoldInfo = styled.p`
-    font-weight: bold;
-    font-size: small;
-    word-wrap: break-word;
-    padding: 0;
-    margin: 0;
-`
 
 /* styled lists */
 const Ul = styled.ul`
@@ -34,30 +14,6 @@ const Ul = styled.ul`
 const Li = styled.li`
     margin: 0;
     padding: 0;
-`
-
-/* styled divs */
-const InlineInfo = styled.div`
-    display: flex;
-    align-items: center;
-    white-space: pre;
-    padding: 0;
-    margin: 0;
-`
-
-const Entry = styled.div`
-    padding: 0.1em 0.5em;
-    margin: 0.1em 0.5em;
-    text-align: left;
-`
-
-const Card = styled.div`
-    margin: 1em;
-    padding: 0.5em 0;
-    background-color: white;
-    border: 2px solid #95AFC0;
-    border-radius: 10px;
-    overflow: scroll;
 `
 
 const Container = styled.div`
@@ -89,15 +45,15 @@ const Instructions = () => {
             </Entry>
             <Entry>
                 <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.MODULE_COLOR)}}>purple</BoldInfo>
+                    <Header style={{color: convertColor(C.MODULE_COLOR)}}>purple</Header>
                     <Info> blocks are op modules</Info>
                 </InlineInfo>
                 <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.INPUT_COLOR)}}>blue</BoldInfo>
+                    <Header style={{color: convertColor(C.INPUT_COLOR)}}>blue</Header>
                     <Info> blocks are i/o nodes</Info>
                 </InlineInfo>
                 <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.NODE_COLOR)}}>gray</BoldInfo>
+                    <Header style={{color: convertColor(C.NODE_COLOR)}}>gray</Header>
                     <Info> blocks are op nodes</Info>
                 </InlineInfo>
             </Entry>
@@ -119,18 +75,25 @@ const Metadata = (props) => {
         // map shapes to text entries
         let shapes = props.meta[key].map(
             (element, idx) =>
-                <Li><Info key={idx}>{formatShape(element)}</Info></Li>
+                <Li key={idx}><Info>{formatShape(element)}</Info></Li>
         );
-        return [<BoldInfo>{label}</BoldInfo>, <Ul>{shapes}</Ul>];
+        return [
+            <Header key='header'>{label}</Header>,
+            <Ul key='contents'>{shapes}</Ul>
+        ];
     }
 
     const getInputs = () => {
         if ('input' in props.meta) {
             let inputs = props.meta.input.map(
                 (element, idx) => 
-                    <Li><Info key={idx}>{element}</Info></Li>
+                    <Li key={idx}><Info>{element}</Info></Li>
             );
-            return [<BoldInfo>inputs</BoldInfo>, <Ul>{inputs}</Ul>];
+
+            return [
+                <Header key='header'>inputs</Header>,
+                <Ul key='contents'>{inputs}</Ul>
+            ];
         } else {
             return <></>;
         }
@@ -145,9 +108,12 @@ const Metadata = (props) => {
         // grab the params
         let params = props.meta.params.map(
             (element, idx) => 
-                <Li><Info key={idx}>{element}</Info></Li>
+                <Li key={idx}><Info>{element}</Info></Li>
         );
-        return [<BoldInfo>params</BoldInfo>, <Ul>{params}</Ul>];
+        return [
+            <Header key='header'>params</Header>,
+            <Ul key='contents'>{params}</Ul>
+        ];
     }
 
     const formatName = () => {
@@ -167,7 +133,7 @@ const Metadata = (props) => {
             }
             let margin = String(10 * i);
             formatted.push(
-                <Info style={{marginLeft: margin+'px'}}>{line}</Info>
+                <Info key={i} style={{marginLeft: margin+'px'}}>{line}</Info>
             );
         }
         return formatted;
@@ -176,36 +142,36 @@ const Metadata = (props) => {
     let meta = <></>;
     if (props.meta !== null) {
         meta = [
-            <Entry>
-                <BoldInfo>name</BoldInfo>
+            <Entry key='name'>
+                <Header>name</Header>
                 {formatName()}
             </Entry>,
-            <Entry>
-                <BoldInfo>op</BoldInfo>
+            <Entry key='op'>
+                <Header>op</Header>
                 <Info>{props.meta.op}</Info>
             </Entry>
         ];
 
         if (props.type !== C.INPUT_TYPE && props.meta.op !== C.PARAM_NODE_OP) {
             meta.push(
-                <Entry>
+                <Entry key='inputs'>
                     {getInputs()}
                 </Entry>,
-                <Entry>
+                <Entry key='input shapes'>
                     {getShapes('input_shapes', 'input shapes')}
                 </Entry>
             );
         }
         if (props.type !== C.OUTPUT_TYPE && props.meta.op !== C.IO_NODE_OP) {
             meta.push(
-                <Entry>
+                <Entry key='output shapes'>
                     {getShapes('output_shapes', 'output shapes')}
                 </Entry>
             );
         }
         if (props.type === C.MODULE_TYPE) {
             meta.push(
-                <Entry>
+                <Entry key='params'>
                     {getParams()}
                 </Entry>
             )
