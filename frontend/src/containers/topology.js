@@ -31,9 +31,13 @@ const Topology = (props) => {
             <Canvas
                 camera={{position: [0, 0, 25]}}
                 gl={{physicallyCorrectLights: true}}>
-                <ambientLight />
+                <ambientLight intensity={0.75} />
                 <pointLight position={[0, 0, 5000]} intensity={0.75} castShadow={true} />
+                <pointLight position={[0, 0, -5000]} intensity={0.75} castShadow={true} />
                 <pointLight position={[5000, 0, 0]} intensity={0.5} castShadow={true} />
+                <pointLight position={[-5000, 0, 0]} intensity={0.5} castShadow={true} />
+                <pointLight position={[0, 5000, 0]} intensity={0.25} castShadow={true} />
+                <pointLight position={[0, -5000, 0]} intensity={0.25} castShadow={true} />
                 <Controls rotation={props.rotation} tag={props.tag} position={props.position} />
 
                 <Nodes

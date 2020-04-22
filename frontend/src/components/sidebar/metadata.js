@@ -46,7 +46,8 @@ const InlineInfo = styled.div`
 `
 
 const Entry = styled.div`
-    padding: 0.25em 1em;
+    padding: 0.1em 0.5em;
+    margin: 0.1em 0.5em;
     text-align: left;
 `
 
@@ -92,7 +93,7 @@ const Instructions = () => {
                     <Info> blocks are op modules</Info>
                 </InlineInfo>
                 <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.INPUT_COLOR)}}>yellow</BoldInfo>
+                    <BoldInfo style={{color: convertColor(C.INPUT_COLOR)}}>blue</BoldInfo>
                     <Info> blocks are i/o nodes</Info>
                 </InlineInfo>
                 <InlineInfo>
