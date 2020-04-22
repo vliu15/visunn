@@ -55,18 +55,26 @@ class Modu(object):
         module = self._modules[name]
         meta = {}
 
-        def _fix_node_inputs(node):
+        def _fix_links(node):
             ''' edits node inputs to reflect modularization '''
-            for idx, input_name in enumerate(node['input']):
+            delim = len(node['input'])
+            for idx, link in enumerate(node['input'] + node['output']):
+
                 # if input comes from this module
-                if input_name.find(name) == 0:
-                    sub_name = input_name[len(name):].split('/')[0]
+                if link.find(name) == 0:
+                    sub_name = link[len(name):].split('/')[0]
+
                     # if input comes from a submodule
                     if sub_name in module['modules']:
-                        node['input'][idx] = name + sub_name + '/'
+                        if idx < delim:
+                            node['input'][idx] = name + sub_name + '/'
+                        else:
+                            node['output'][idx-delim] = name + sub_name + '/'
+
 
             # discard duplicates from multiple inputs from same module
             node['input'] = list(set(node['input']))
+            node['output'] = list(set(node['output']))
             return node
 
         def _add_nodes(node_type):
@@ -77,19 +85,14 @@ class Modu(object):
                     node_name = name + node_name
 
                 node = deepcopy(self._graphdict[node_name])
-                node['input_shapes'] = []
 
                 # add input shapes (from input nodes' output shapes)
-                if node_type != 'in_nodes':
-                    for in_name in node['input']:
-                        in_node = self._graphdict[in_name]
-                        node['input_shapes'] += in_node['output_shapes']
-                    node = _fix_node_inputs(node)
-                # in_nodes are inputs to this module, so get rid of inputs
-                else:
+                if node_type == 'in_nodes':
                     node['input'] = []
+                elif node_type == 'out_nodes':
+                    node['output'] = []
 
-                meta[node_name] = node
+                meta[node_name] = _fix_links(node)
 
         def _add_modules():
             ''' adds all modules to the metadata dict '''
@@ -97,7 +100,7 @@ class Modu(object):
                 sub_name = name + submodule + '/'
                 submodule = self._modules[sub_name]
 
-                node_info = {
+                node = {
                     'name': sub_name,
                     'op': 'visu::module',
                     'input': list(submodule['in_nodes']),
@@ -106,9 +109,8 @@ class Modu(object):
                     'output_shapes': list(submodule['out_shapes']),
                     'params': sorted(submodule['params'])
                 }
-                node = _fix_node_inputs(node_info)
+                meta[sub_name] = _fix_links(node)
 
-                meta[sub_name] = node
 
         # convert all modules and nodes to dict
         # #####################################################################

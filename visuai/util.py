@@ -22,7 +22,9 @@ def proto_to_dict(graphdef):
         'name': '',           # str         : node name
         'op': '',             # str         : op name
         'input': [],          # list(str)   : list of input names
-        'output_shapes': []   # list(tuple) : list of shape tuples
+        'output': [],         # list(str)   : list of output names
+        'input_shapes': [],   # list(tuple) : list of input shape tuples
+        'output_shapes': []   # list(tuple) : list of output shape tuples
     }
 
     graphdict = {}
@@ -31,7 +33,9 @@ def proto_to_dict(graphdef):
         graphdict[node['name']] = {
             'name': node.get('name', ''),
             'op': node.get('op', ''),
-            'input': node.get('input', ''),
+            'input': node.get('input', []),
+            'output': [],
+            'input_shapes': [],
             'output_shapes': []
         }
         if '_output_shapes' in node['attr']:
@@ -56,10 +60,10 @@ def process_nodes(graphdict):
     for name, node in graphdict.items():
         outputs = outputs.difference(set(node['input']))
 
-    # initialize bfs
-    queue = [graphdict[name] for name in outputs]
+    # [1] prune nodes with bfs
+    # #########################################################################
+    queue = [copy(graphdict[name]) for name in outputs]
     seen = set()
-
     while len(queue) > 0:
         node = queue.pop(0)
         seen.add(node['name'])
@@ -69,6 +73,8 @@ def process_nodes(graphdict):
         # for each input, merge its inputs if 'prim'
         for idx, input_name in enumerate(node['input']):
             input_node = graphdict.get(input_name, None)
+            if input_node is not None:
+                input_node = copy(input_node)
 
             # torch==1.4.0: delete nodes not in graphdef
             if input_node is None:
@@ -83,6 +89,8 @@ def process_nodes(graphdict):
                     'name': input_name,
                     'op': 'visu::param',
                     'input': [],
+                    'output': [],
+                    'input_shapes': [],
                     'output_shapes': input_node['output_shapes']
                 }
                 node['input'][idx] = input_name
@@ -108,11 +116,31 @@ def process_nodes(graphdict):
         if contains_prim:
             queue.append(copy(node))
 
-    # remove those nodes from the graphdict
+    # [2] clean up graphdict
+    # #########################################################################
     for name in list(graphdict):
         node = graphdict[name]
         if node['op'].split('::')[0] == 'prim':
             graphdict.pop(name)
+
+    # [3] add doubly linked connections with bfs
+    # #########################################################################
+    queue = [copy(graphdict[name]) for name in outputs]
+    seen = set()
+    while len(queue) > 0:
+        node = queue.pop(0)
+        name = node['name']
+        seen.add(name)
+
+        for in_name in node['input']:
+            in_node = copy(graphdict[in_name])
+
+            node['input_shapes'] += in_node['output_shapes']
+            in_node['output'] += [node['name']]
+            if in_name not in seen:
+                queue.append(in_node)
+
+        graphdict[name] = node
 
     return graphdict
 

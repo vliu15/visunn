@@ -39,7 +39,7 @@ def topology_blueprint(modu):
         for name, node in meta.items():
             if 'input' in list(node):
                 edges[name] = [
-                    in_name for in_name in node['input']if in_name in meta
+                    in_name for in_name in node['input'] if in_name in meta
                 ]
 
         # [4] use these edges to plot and retrieve coordinates

@@ -102,7 +102,6 @@ class Visu(object):
             import shutil
             shutil.rmtree(logdir)
         os.makedirs(os.path.join(os.getcwd(), logdir))
-
         with open(os.path.join(logdir, name + MODU_EXT), 'wb') as f:
             pickle.dump(self._modu, f)
 
