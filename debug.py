@@ -61,45 +61,55 @@ def main(args):
     # [1] convert model to protobuf
     start = time.time()
     graphdef, _ = graph(model, inputs)
+    for _ in range(args.rep - 1):
+        graphdef, _ = graph(model, inputs)
     end = time.time()
     print('[1] convert model to protobuf: {:.3f}s'
-          .format(end - start), flush=True)
+          .format((end - start)/args.rep), flush=True)
     print('    protobuf footprint: {}b'
           .format(graphdef.ByteSize()), flush=True)
 
     # [2] convert protobuf to dict
     start = time.time()
     graphdict = proto_to_dict(graphdef)
+    for _ in range(args.rep - 1):
+        graphdict = proto_to_dict(graphdef)
     end = time.time()
     print('[2] convert protobuf to dict: {:.3f}s'
-          .format(end - start), flush=True)
+          .format((end - start)/args.rep), flush=True)
     print('    dict footprint: {}b'
           .format(asizeof.asizeof(graphdict)))
 
     # [3] prune trivial nodes
     start = time.time()
     graphdict = process_nodes(graphdict)
+    for _ in range(args.rep - 1):
+        graphdict = process_nodes(graphdict)
     end = time.time()
     print('[3] prune trivial nodes: {:.3f}s'
-          .format(end - start), flush=True)
+          .format((end - start)/args.rep), flush=True)
     print('    dict footprint: {}b'
           .format(asizeof.asizeof(graphdict)))
 
     # [4] prune trivial modules
     start = time.time()
     graphdict = process_modules(graphdict)
+    for _ in range(args.rep - 1):
+        graphdict = process_modules(graphdict)
     end = time.time()
     print('[4] prune trivial modules: {:.3f}s'
-          .format(end - start), flush=True)
+          .format((end - start)/args.rep), flush=True)
     print('    dict footprint: {}b'
           .format(asizeof.asizeof(graphdict)))
 
     # [5] build modularized topology
     start = time.time()
     modu = build_modu(graphdict)
+    for _ in range(args.rep - 1):
+        modu = build_modu(graphdict)
     end = time.time()
     print('[5] build modularized topology: {:.3f}s'
-          .format(end - start), flush=True)
+          .format((end - start)/args.rep), flush=True)
     print('    modu footprint: {}b'
           .format(asizeof.asizeof(modu)))
 
@@ -163,6 +173,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--name', type=str, default='ThreeLayerMLP',
                         help='string of callable (torchvision) model')
+    parser.add_argument('-r', '--rep', type=int, default=5,
+                        help='number of trials to average over')
     parser.add_argument('-s', '--shell', default=False, action='store_true',
                         help='whether to run interactive shell mode')
     args = parser.parse_args()

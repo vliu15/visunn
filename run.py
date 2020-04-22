@@ -16,8 +16,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--logdir', type=str, required=True,
                         help='string of callable (torchvision) model')
+    parser.add_argument('-n', '--name', type=str, required=True,
+                        help='string of model name')
     args = parser.parse_args()
 
-    logdir = os.path.join(LOG_DIR, args.logdir)
-    app = App(logdir)
+    app = App(args.logdir, args.name)
     app.run()

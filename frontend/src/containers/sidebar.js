@@ -35,6 +35,7 @@ const Sidebar = (props) => {
         let previousModule = document.getElementById('previousModule');
         let resetRotation = document.getElementById('resetRotation');
         let resetPosition = document.getElementById('resetPosition');
+        let rootModule = document.getElementById('rootModule')
 
         if (previousModule !== null) {
             previousModule.onclick = () => {
@@ -51,6 +52,11 @@ const Sidebar = (props) => {
         resetPosition.onclick = () => {
             props.setPosition(true);
             return true;
+        }
+        rootModule.onclick = () => {
+            let host = window.location.hostname;
+            let port = window.location.port
+            window.location.href = 'http://' + host + ':' + port + '/';
         }
     });
 

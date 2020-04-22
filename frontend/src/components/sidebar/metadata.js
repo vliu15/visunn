@@ -59,16 +59,16 @@ const Metadata = (props) => {
         ];
     }
 
-    const getInputs = () => {
-        if ('input' in props.meta) {
-            let inputs = props.meta.input.map(
+    const getLinks = (key, label) => {
+        if (key in props.meta) {
+            let links = props.meta[key].map(
                 (element, idx) => 
                     <Li key={idx}><Info>{element}</Info></Li>
             );
 
             return [
-                <Header key='header'>inputs</Header>,
-                <Ul key='contents'>{inputs}</Ul>
+                <Header key='header'>{label}</Header>,
+                <Ul key='contents'>{links}</Ul>
             ];
         } else {
             return <></>;
@@ -133,7 +133,7 @@ const Metadata = (props) => {
         if (props.type !== C.INPUT_TYPE && props.meta.op !== C.PARAM_NODE_OP) {
             meta.push(
                 <Entry key='inputs'>
-                    {getInputs()}
+                    {getLinks('input', 'inputs')}
                 </Entry>,
                 <Entry key='input shapes'>
                     {getShapes('input_shapes', 'input shapes')}
@@ -144,6 +144,9 @@ const Metadata = (props) => {
         // output nodes don't show anything about outputs
         if (props.type !== C.OUTPUT_TYPE) {
             meta.push(
+                <Entry key='outputs'>
+                    {getLinks('output', 'outputs')}
+                </Entry>,
                 <Entry key='output shapes'>
                     {getShapes('output_shapes', 'output shapes')}
                 </Entry>

@@ -6,7 +6,7 @@ import os
 import pickle
 from torch.utils.tensorboard._pytorch_graph import graph
 
-from constants import LOG_DIR, MODU_FILE
+from constants import LOG_DIR, MODU_EXT
 from visuai.util import proto_to_dict, process_nodes, process_modules, \
                         build_modu
 from visuai.modu import Modu
@@ -19,7 +19,7 @@ __all__ = ['Visu']
 
 class Visu(object):
     ''' high level api for users '''
-    def __init__(self, model, dataloader, logdir='', name='model'):
+    def __init__(self, model, dataloader, logdir=LOG_DIR, name='model'):
         ''' initializes visu, which builds model topology
 
             model       (torch.nn.Module)             : pytorch model
@@ -91,30 +91,24 @@ class Visu(object):
         # easy to interact with and represent as a web app
         # #####################################################################
         self._modu = build_modu(graphdict, params=params)
-        from pprint import pprint
-        pprint(self._modu._graphdict)
 
         # [6] log it for later access
-        if logdir == '':
-            logdir = 'test'
-        logdir = os.path.join(LOG_DIR, logdir)
-
-        # NOTE: uncomment to disallow collisions
         # #####################################################################
-        # if os.path.exists(logdir) and os.path.isdir(logdir):
-        #     raise OSError('The directory {} already exists.')
-        # #####################################################################
+        save_path = os.path.join(logdir, name + MODU_EXT)
 
-        if os.path.exists(logdir):
-            import shutil
-            shutil.rmtree(logdir)
-        os.makedirs(os.path.join(os.getcwd(), logdir))
-        with open(os.path.join(logdir, MODU_FILE), 'wb') as f:
+        if not os.path.exists(logdir):
+            os.makedirs(os.path.join(os.getcwd(), logdir))
+        elif os.path.exists(save_path):
+            format_warning = '\033[93m' + 'WARNING:' + '\033[0m'
+            print(format_warning + ' {} already exists.'.format(save_path))
+
+        with open(save_path, 'wb') as f:
             pickle.dump(self._modu, f)
 
         # terminate child process
+        format_name = '\033[92m' + name + '\033[0m'
         print('Successfully parsed and saved {} topology!'
-              .format(name), flush=True)
+              .format(format_name), flush=True)
         os._exit(0)
 
     # NOTE: see https://www.wandb.com for this intended functionality

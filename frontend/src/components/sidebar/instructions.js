@@ -21,7 +21,7 @@ const Instructions = () => {
     return (
         <Card style={{overflow: 'visible'}}>
             <Entry>
-                <Title>visuai: how to</Title>
+                <Title><strong>visuai</strong>: how to</Title>
             </Entry>
             <Entry>
                 <Info><strong>hover</strong> over a node to display its info below</Info>
@@ -39,7 +39,11 @@ const Instructions = () => {
                 </InlineInfo>
                 <InlineInfo>
                     <Header style={{color: convertColor(C.INPUT_COLOR)}}>blue</Header>
-                    <Info> blocks are i/o nodes</Info>
+                    <Info> blocks are input nodes</Info>
+                </InlineInfo>
+                <InlineInfo>
+                    <Header style={{color: convertColor(C.OUTPUT_COLOR)}}>orange</Header>
+                    <Info> blocks are output nodes</Info>
                 </InlineInfo>
                 <InlineInfo>
                     <Header style={{color: convertColor(C.NODE_COLOR)}}>gray</Header>
