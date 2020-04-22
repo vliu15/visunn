@@ -9,13 +9,13 @@ export const ROOT = 'root';
 // input nodes
 export const INPUT_COLOR = 0x22A6B3;
 export const INPUT_HOVER_COLOR = INPUT_COLOR;
-export const INPUT_SIZE = [1, 1, 1];
+export const INPUT_SIZE = [0.75, 0.75, 0.75];
 export const INPUT_TYPE = 'input';
 
 // output nodes
 export const OUTPUT_COLOR = 0xF0932B;
 export const OUTPUT_HOVER_COLOR = OUTPUT_COLOR;
-export const OUTPUT_SIZE = [1, 1, 1];
+export const OUTPUT_SIZE = INPUT_SIZE;
 export const OUTPUT_TYPE = 'output';
 
 // modules
