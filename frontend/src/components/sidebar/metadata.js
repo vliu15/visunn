@@ -1,31 +1,17 @@
+/**
+ * @file contains parts for rendering metadata of hovered node
+ * @author Vincent Liu
+ */
+
 import React from 'react';
 import styled from 'styled-components';
 
+import { Header, Info } from '../text';
+import { Entry, Card } from '../div';
+import Instructions from './instructions';
 import * as C from '../../constants';
 
-/* styled text */
-const Title = styled.h2`
-    font-size: large;
-    word-wrap: break-word;
-    margin: 0;
-`
-
-const Info = styled.p`
-    font-size: small;
-    word-wrap: break-word;
-    padding: 0;
-    margin: 0;
-`
-
-const BoldInfo = styled.p`
-    font-weight: bold;
-    font-size: small;
-    word-wrap: break-word;
-    padding: 0;
-    margin: 0;
-`
-
-/* styled lists */
+// lists for enumerated data
 const Ul = styled.ul`
     margin: 0;
     padding-left: 20px;
@@ -36,29 +22,7 @@ const Li = styled.li`
     padding: 0;
 `
 
-/* styled divs */
-const InlineInfo = styled.div`
-    display: flex;
-    align-items: center;
-    white-space: pre;
-    padding: 0;
-    margin: 0;
-`
-
-const Entry = styled.div`
-    padding: 0.25em 1em;
-    text-align: left;
-`
-
-const Card = styled.div`
-    margin: 1em;
-    padding: 0.5em 0;
-    background-color: white;
-    border: 2px solid #95AFC0;
-    border-radius: 10px;
-    overflow: scroll;
-`
-
+// container for metadata
 const Container = styled.div`
     flex-grow: 1;
     display: flex;
@@ -68,42 +32,11 @@ const Container = styled.div`
     overflow: auto;
 `
 
-const Instructions = () => {
-    const convertColor = (hex) => {
-        return '#' + hex.toString(16);
-    }
-
-    return (
-        <Card style={{overflow: 'visible'}}>
-            <Entry>
-                <Title>visuai: how to</Title>
-            </Entry>
-            <Entry>
-                <Info><strong>hover</strong> over a node to display its info below</Info>
-                <Info><strong>click</strong> on a module to open its contents</Info>
-            </Entry>
-            <Entry>
-                <Info><strong>drag</strong> to rotate</Info>
-                <Info><strong>scroll</strong> to zoom</Info>
-            </Entry>
-            <Entry>
-                <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.MODULE_COLOR)}}>purple</BoldInfo>
-                    <Info> blocks are op modules</Info>
-                </InlineInfo>
-                <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.INPUT_COLOR)}}>yellow</BoldInfo>
-                    <Info> blocks are i/o nodes</Info>
-                </InlineInfo>
-                <InlineInfo>
-                    <BoldInfo style={{color: convertColor(C.NODE_COLOR)}}>gray</BoldInfo>
-                    <Info> blocks are op nodes</Info>
-                </InlineInfo>
-            </Entry>
-        </Card>
-    )
-}
-
+/**
+ * returns cards containing metadata and `visuai: how to` instructions
+ *
+ * @param {*} props passed from Sidebar
+ */
 const Metadata = (props) => {
     const getShapes = (key, label) => {
         // make sure this node has a shapes
@@ -118,18 +51,25 @@ const Metadata = (props) => {
         // map shapes to text entries
         let shapes = props.meta[key].map(
             (element, idx) =>
-                <Li><Info key={idx}>{formatShape(element)}</Info></Li>
+                <Li key={idx}><Info>{formatShape(element)}</Info></Li>
         );
-        return [<BoldInfo>{label}</BoldInfo>, <Ul>{shapes}</Ul>];
+        return [
+            <Header key='header'>{label}</Header>,
+            <Ul key='contents'>{shapes}</Ul>
+        ];
     }
 
     const getInputs = () => {
         if ('input' in props.meta) {
             let inputs = props.meta.input.map(
                 (element, idx) => 
-                    <Li><Info key={idx}>{element}</Info></Li>
+                    <Li key={idx}><Info>{element}</Info></Li>
             );
-            return [<BoldInfo>inputs</BoldInfo>, <Ul>{inputs}</Ul>];
+
+            return [
+                <Header key='header'>inputs</Header>,
+                <Ul key='contents'>{inputs}</Ul>
+            ];
         } else {
             return <></>;
         }
@@ -144,9 +84,12 @@ const Metadata = (props) => {
         // grab the params
         let params = props.meta.params.map(
             (element, idx) => 
-                <Li><Info key={idx}>{element}</Info></Li>
+                <Li key={idx}><Info>{element}</Info></Li>
         );
-        return [<BoldInfo>params</BoldInfo>, <Ul>{params}</Ul>];
+        return [
+            <Header key='header'>params</Header>,
+            <Ul key='contents'>{params}</Ul>
+        ];
     }
 
     const formatName = () => {
@@ -166,7 +109,7 @@ const Metadata = (props) => {
             }
             let margin = String(10 * i);
             formatted.push(
-                <Info style={{marginLeft: margin+'px'}}>{line}</Info>
+                <Info key={i} style={{marginLeft: margin+'px'}}>{line}</Info>
             );
         }
         return formatted;
@@ -174,40 +117,46 @@ const Metadata = (props) => {
 
     let meta = <></>;
     if (props.meta !== null) {
+        // all nodes have name and op
         meta = [
-            <Entry>
-                <BoldInfo>name</BoldInfo>
+            <Entry key='name'>
+                <Header>name</Header>
                 {formatName()}
             </Entry>,
-            <Entry>
-                <BoldInfo>op</BoldInfo>
+            <Entry key='op'>
+                <Header>op</Header>
                 <Info>{props.meta.op}</Info>
             </Entry>
         ];
 
+        // input and param nodes don't show anything about inputs
         if (props.type !== C.INPUT_TYPE && props.meta.op !== C.PARAM_NODE_OP) {
             meta.push(
-                <Entry>
+                <Entry key='inputs'>
                     {getInputs()}
                 </Entry>,
-                <Entry>
+                <Entry key='input shapes'>
                     {getShapes('input_shapes', 'input shapes')}
                 </Entry>
             );
         }
-        if (props.type !== C.OUTPUT_TYPE && props.meta.op !== C.IO_NODE_OP) {
+
+        // output nodes don't show anything about outputs
+        if (props.type !== C.OUTPUT_TYPE) {
             meta.push(
-                <Entry>
+                <Entry key='output shapes'>
                     {getShapes('output_shapes', 'output shapes')}
                 </Entry>
             );
         }
+
+        // only modules show params
         if (props.type === C.MODULE_TYPE) {
             meta.push(
-                <Entry>
+                <Entry key='params'>
                     {getParams()}
                 </Entry>
-            )
+            );
         }
 
         meta = <Card>{meta}</Card>;
@@ -218,7 +167,7 @@ const Metadata = (props) => {
             <Instructions />
             {meta}
         </Container>
-    )
+    );
 }
 
 export default Metadata;

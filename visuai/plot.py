@@ -5,50 +5,26 @@
 import networkx as nx
 import numpy as np
 
-from constants import NORM_FUNC, NORM_M, NORM_V
-
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
 
 __all__ = ['plot']
 
 
-def _rescale_to_uniform(xs, ys):
-    xmax = max(xs)
-    xmin = min(xs)
-    xshift = (xmax - xmin) / 2.
-    xscale = (xmax + xmin) / 2.
-    if xshift < 1e-3:
-        xnorm = lambda x: NORM_M
-    else: 
-        xnorm = lambda x: (x - xshift) / xscale * NORM_V + NORM_M
-
-    ymax = max(ys)
-    ymin = min(ys)
-    yshift = (ymax - ymin) / 2.
-    yscale = (ymax + ymin) / 2.
-    if yshift < 1e-3:
-        ynorm = lambda y: NORM_M
-    else:
-        ynorm = lambda y: (y - yshift) / yscale * NORM_V + NORM_M
-
-    return xnorm, ynorm
-
-
-def _rescale_to_gaussian(xs, ys):
+def _rescale_to_gaussian(xs, ys, v=7.5):
     xmean = np.mean(xs)
     xstd = np.std(xs)
     if xstd < 1e-3:
-        xnorm = lambda x: NORM_M
+        xnorm = lambda x: 0
     else:
-        xnorm = lambda x: (x - xmean) / xstd * NORM_V + NORM_M
+        xnorm = lambda x: (x - xmean) / xstd * v
 
     ymean = np.mean(ys)
     ystd = np.std(ys)
     if ystd < 1e-3:
-        ynorm = lambda y: NORM_M
+        ynorm = lambda y: 0
     else:
-        ynorm = lambda y: (y - ymean) / ystd * NORM_V + NORM_M
+        ynorm = lambda y: (y - ymean) / ystd * v
 
     return xnorm, ynorm
 
@@ -87,8 +63,7 @@ def plot(edges, normalize=True, truncate=False):
     # #########################################################################
 
     xs, ys = zip(*pos.values())
-    rescale_func = eval(NORM_FUNC)
-    xnorm, ynorm = rescale_func(xs, ys)
+    xnorm, ynorm = _rescale_to_gaussian(list(set(xs)), list(set(ys)), v=len(edges))
 
     for node, (x, y) in pos.items():
         pos[node] = (xnorm(x), ynorm(y))

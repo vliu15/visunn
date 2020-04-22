@@ -9,7 +9,7 @@ import React from 'react';
 /**
  * returns a line between to points (edge between nodes)
  * 
- * @param {Array} props.vertices 6-element array of 2 sets of endpoints
+ * @param {*} props passed from Edges
  */
 const Edge = (props) => {
     const vertices = new Float32Array(props.vertices);
@@ -30,8 +30,7 @@ const Edge = (props) => {
 /**
  * returns a set of lines to be drawn onto the canvas
  * 
- * @param {Object} props.edges mapping from a node name to a list of its inputs
- * @param {Object} props.coords mapping from a node name to (x,y) coordinates
+ * @param {*} props passed from Topology
  */
 const Edges = (props) => {
     let parts = [];

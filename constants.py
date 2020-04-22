@@ -7,8 +7,7 @@ __email__ = 'vliu15@stanford.edu'
 
 __all__ = ['DATA_DIR',
            'LOG_DIR', 'MODU_FILE',
-           'MODU_ROOT',
-           'NORM_FUNC', 'NORM_M', 'NORM_V']
+           'MODU_ROOT']
 
 # train config
 DATA_DIR = 'data'
@@ -19,8 +18,3 @@ MODU_FILE = 'modu.pt'
 
 # modu config
 MODU_ROOT = ''
-
-# plot config
-NORM_FUNC = '_rescale_to_gaussian'
-NORM_M = 0.0
-NORM_V = 7.5

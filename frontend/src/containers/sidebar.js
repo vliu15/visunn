@@ -1,3 +1,8 @@
+/**
+ * @file contains the sidebar component
+ * @author Vincent Liu
+ */
+
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -5,6 +10,7 @@ import Buttons from '../components/sidebar/buttons';
 import Metadata from '../components/sidebar/metadata';
 
 
+// sidebar container
 const Container = styled.div`
     position: relative;
     max-height: 100vh;
@@ -18,6 +24,11 @@ const Container = styled.div`
     border: none;
 `
 
+/**
+ * returns sidebar, which contains buttons and instruction + data cards
+ *
+ * @param {*} props passed from App
+ */
 const Sidebar = (props) => {
     // add onclick event handlers
     useEffect(() => {
@@ -48,7 +59,7 @@ const Sidebar = (props) => {
             <Buttons hasPrevious={props.hasPrevious} />
             <Metadata meta={props.meta} type={props.type} />
         </Container>
-    )
+    );
 }
 
 export default Sidebar;
