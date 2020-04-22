@@ -63,11 +63,14 @@ const Buttons = (props) => {
                 : <InactiveButton>
                     previous<br />module
                 </InactiveButton>}
+            <ActiveButton id='rootModule'>
+            root<br />module
+            </ActiveButton>
             <ActiveButton id='resetRotation'>
                 reset<br />rotation
             </ActiveButton>
             <ActiveButton id='resetPosition'>
-                reset <br />position
+                reset<br />position
             </ActiveButton>
         </Container>
     );
