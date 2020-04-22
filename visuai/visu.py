@@ -94,20 +94,21 @@ class Visu(object):
 
         # [6] log it for later access
         # #####################################################################
-        # NOTE: uncomment to disallow collisions
-        # if os.path.exists(logdir) and os.path.isdir(logdir):
-        #     raise OSError('The directory {} already exists.')
-        # #####################################################################
-        if os.path.exists(logdir):
-            import shutil
-            shutil.rmtree(logdir)
-        os.makedirs(os.path.join(os.getcwd(), logdir))
-        with open(os.path.join(logdir, name + MODU_EXT), 'wb') as f:
+        save_path = os.path.join(logdir, name + MODU_EXT)
+
+        if not os.path.exists(logdir):
+            os.makedirs(os.path.join(os.getcwd(), logdir))
+        elif os.path.exists(save_path):
+            format_warning = '\033[93m' + 'WARNING:' + '\033[0m'
+            print(format_warning + ' {} already exists.'.format(save_path))
+
+        with open(save_path, 'wb') as f:
             pickle.dump(self._modu, f)
 
         # terminate child process
+        format_name = '\033[92m' + name + '\033[0m'
         print('Successfully parsed and saved {} topology!'
-              .format(name), flush=True)
+              .format(format_name), flush=True)
         os._exit(0)
 
     # NOTE: see https://www.wandb.com for this intended functionality
