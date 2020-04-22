@@ -12,7 +12,7 @@ from tqdm import tqdm
 from copy import deepcopy
 
 from models import torch_models
-from constants import DATA_DIR
+from constants import DATA_DIR, LOG_DIR
 from visuai.visu import Visu
 
 __author__ = 'Vincent Liu'
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--name', type=str, default='ThreeLayerMLP',
                         help='string of callable (torchvision) model')
-    parser.add_argument('-l', '--logdir', type=str, default='',
+    parser.add_argument('-l', '--logdir', type=str, default=LOG_DIR,
                         help='where to log model for web app use')
     args = parser.parse_args()
 

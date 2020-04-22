@@ -6,7 +6,7 @@ import os
 import pickle
 from torch.utils.tensorboard._pytorch_graph import graph
 
-from constants import LOG_DIR, MODU_FILE
+from constants import LOG_DIR, MODU_EXT
 from visuai.util import proto_to_dict, process_nodes, process_modules, \
                         build_modu
 from visuai.modu import Modu
@@ -19,7 +19,7 @@ __all__ = ['Visu']
 
 class Visu(object):
     ''' high level api for users '''
-    def __init__(self, model, dataloader, logdir='', name='model'):
+    def __init__(self, model, dataloader, logdir=LOG_DIR, name='model'):
         ''' initializes visu, which builds model topology
 
             model       (torch.nn.Module)             : pytorch model
@@ -91,25 +91,19 @@ class Visu(object):
         # easy to interact with and represent as a web app
         # #####################################################################
         self._modu = build_modu(graphdict, params=params)
-        from pprint import pprint
-        pprint(self._modu._graphdict)
 
         # [6] log it for later access
-        if logdir == '':
-            logdir = 'test'
-        logdir = os.path.join(LOG_DIR, logdir)
-
-        # NOTE: uncomment to disallow collisions
         # #####################################################################
+        # NOTE: uncomment to disallow collisions
         # if os.path.exists(logdir) and os.path.isdir(logdir):
         #     raise OSError('The directory {} already exists.')
         # #####################################################################
-
         if os.path.exists(logdir):
             import shutil
             shutil.rmtree(logdir)
         os.makedirs(os.path.join(os.getcwd(), logdir))
-        with open(os.path.join(logdir, MODU_FILE), 'wb') as f:
+
+        with open(os.path.join(logdir, name + MODU_EXT), 'wb') as f:
             pickle.dump(self._modu, f)
 
         # terminate child process
