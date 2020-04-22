@@ -13,9 +13,9 @@ export const INPUT_SIZE = [1, 1, 1];
 export const INPUT_TYPE = 'input';
 
 // output nodes
-export const OUTPUT_COLOR = INPUT_COLOR;
+export const OUTPUT_COLOR = 0xF0932B;
 export const OUTPUT_HOVER_COLOR = OUTPUT_COLOR;
-export const OUTPUT_SIZE = INPUT_SIZE;
+export const OUTPUT_SIZE = [1, 1, 1];
 export const OUTPUT_TYPE = 'output';
 
 // modules

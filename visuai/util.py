@@ -39,10 +39,12 @@ def proto_to_dict(graphdef):
             'output_shapes': []
         }
         if '_output_shapes' in node['attr']:
-            for shape in node['attr']['_output_shapes']['list']['shape']:
-                graphdict[node['name']]['output_shapes'].append(
-                    tuple(int(dim['size']) for dim in shape['dim'])
-                )
+            shapes = node['attr']['_output_shapes']['list']['shape']
+            for shape in shapes:
+                if 'dim' in shapes:
+                    graphdict[node['name']]['output_shapes'].append(
+                        tuple(int(dim['size']) for dim in shape['dim'])
+                    )
 
     return graphdict
 

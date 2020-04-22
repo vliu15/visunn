@@ -12,7 +12,7 @@ Support for containerized deployment with Docker is still in progress. Visuai wi
 # Import
 from visuai import Visu
 # Initialize
-visu = Visu(model, dataloader, logdir='sample', name='model')
+visu = Visu(model, dataloader, logdir='logs', name='model')
 ```
 2. Launch web app
 ```bash
@@ -23,8 +23,8 @@ cd frontend && npm start
 ```
 
 ## Metrics
-Below are time and space metrics for a few sample models. These can be obtained by running `python debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
- > Steps 1 and 3 are the largest bottlenecks in the algorithm.
+Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
+ > Step 1 is the largest bottlenecks in the algorithm.
 1. Convert model to protobuf (built in Pytorch function)
 2. Convert protobuf to dict
 3. Prune trivial nodes
@@ -33,21 +33,21 @@ Below are time and space metrics for a few sample models. These can be obtained 
 
 | Model              | Step 1   | Step 2  | Step 3  | Step 4  | Step 5  | Space     |
 |--------------------|----------|---------|---------|---------|---------|-----------|
-| ThreeLayerMLP      |  0.076 s | 0.000 s | 0.001 s | 0.000 s | 0.001 s |  19.00 kb |
-| ThreeLayerConvNet  |  0.102 s | 0.000 s | 0.001 s | 0.000 s | 0.001 s |  22.31 kb |
-| resnet18           |  1.385 s | 0.000 s | 0.014 s | 0.001 s | 0.013 s | 242.46 kb |
-| resnet152          |  8.384 s | 0.003 s | 0.329 s | 0.011 s | 0.074 s |   1.49 Mb |
-| densenet121        |  4.474 s | 0.002 s | 0.222 s | 0.021 s | 0.107 s |   1.47 Mb |
-| densenet201        |  7.568 s | 0.004 s | 0.571 s | 0.051 s | 0.292 s |   2.80 Mb |
-| googlenet          |  2.382 s | 0.001 s | 0.066 s | 0.003 s | 0.031 s | 735.41 kb |
-| shufflenet_v2_x2_0 |  2.181 s | 0.001 s | 0.100 s | 0.020 s | 0.038 s | 625.82 kb |
-| mobilenet_v2       |  1.782 s | 0.001 s | 0.053 s | 0.009 s | 0.024 s | 542.38 kb |
-| resnext101_32x8d   | 12.129 s | 0.002 s | 0.160 s | 0.007 s | 0.049 s |   1.09 Mb |
+| ThreeLayerMLP      |  0.042 s | 0.001 s | 0.000 s | 0.000 s | 0.000 s |  32.37 kb |
+| ThreeLayerConvNet  |  0.051 s | 0.002 s | 0.000 s | 0.000 s | 0.000 s |  35.33 kb |
+| resnet18           |  1.282 s | 0.016 s | 0.002 s | 0.001 s | 0.002 s | 335.40 kb |
+| resnet152          |  6.819 s | 0.115 s | 0.065 s | 0.005 s | 0.013 s |   2.14 Mb |
+| densenet121        |  4.143 s | 0.103 s | 0.045 s | 0.008 s | 0.017 s |   1.94 Mb |
+| densenet201        |  7.528 s | 0.174 s | 0.125 s | 0.015 s | 0.034 s |   3.56 Mb |
+| googlenet          |  2.241 s | 0.046 s | 0.011 s | 0.001 s | 0.011 s | 941.52 kb |
+| shufflenet_v2_x2_0 |  2.289 s | 0.070 s | 0.023 s | 0.007 s | 0.010 s |   1.07 Mb |
+| mobilenet_v2       |  1.685 s | 0.045 s | 0.009 s | 0.003 s | 0.005 s | 674.06 kb |
+| resnext101_32x8d   | 11.744 s | 0.085 s | 0.033 s | 0.004 s | 0.009 s |   1.35 Mb |
 | wide_resnet101_2   | 13.495 s | 0.002 s | 0.165 s | 0.007 s | 0.054 s |   1.10 Mb |
-| mnasnet1_3         |  1.573 s | 0.001 s | 0.050 s | 0.010 s | 0.025 s | 520.47 kb |
+| mnasnet1_3         |  1.562 s | 0.042 s | 0.008 s | 0.003 s | 0.005 s | 658.74 kb |
 
 ## Notes
-This section is dedicated to address nuances that come with the Pytorch backend export.
+This section is dedicated to address nuances that come with the Pytorch backend.
 
 ### Recycled Layers
 This problem is exemplified with the following following variation of `ThreeLayerMLP`:
