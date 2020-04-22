@@ -1,9 +1,14 @@
+/**
+ * @file contains component with credits and contact
+ * @author Vincent Liu
+ */
+
 import React from 'react';
 import styled from 'styled-components';
 
 import { Info, Link } from '../components/text';
 
-
+// vincentjianliu container
 const Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -18,6 +23,9 @@ const Container = styled.div`
     border-top-left-radius: 0.5em;
 `
 
+/**
+ * renders a component with credits and contact in bottom right corner
+ */
 const VincentJianLiu = () => {
     return (
         <Container>
@@ -28,7 +36,7 @@ const VincentJianLiu = () => {
                 <Link href='https://www.github.com/vliu15/visuai'>github</Link>
             </div>
         </Container>
-    )
+    );
 }
 
 export default VincentJianLiu;

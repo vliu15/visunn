@@ -1,3 +1,8 @@
+/**
+ * @file contains styled text components
+ * @author Vincent Liu
+ */
+
 import styled from 'styled-components';
 
 
@@ -5,6 +10,9 @@ export const Title = styled.h2`
     font-size: large;
     word-wrap: break-word;
     margin: 0;
+    &:hover {
+        cursor: text;
+    }
 `
 
 export const Info = styled.p`
@@ -12,6 +20,9 @@ export const Info = styled.p`
     word-wrap: break-word;
     padding: 0;
     margin: 0;
+    &:hover {
+        cursor: text;
+    }
 `
 
 export const Header = styled.p`
@@ -20,6 +31,9 @@ export const Header = styled.p`
     word-wrap: break-word;
     padding: 0;
     margin: 0;
+    &:hover {
+        cursor: text;
+    }
 `
 
 export const Link = styled.a`

@@ -1,11 +1,17 @@
+/**
+ * @file contains parts for rendering metadata of hovered node
+ * @author Vincent Liu
+ */
+
 import React from 'react';
 import styled from 'styled-components';
 
-import { Title, Header, Info } from '../text';
-import { InlineInfo, Entry, Card } from '../div';
+import { Header, Info } from '../text';
+import { Entry, Card } from '../div';
+import Instructions from './instructions';
 import * as C from '../../constants';
 
-/* styled lists */
+// lists for enumerated data
 const Ul = styled.ul`
     margin: 0;
     padding-left: 20px;
@@ -16,6 +22,7 @@ const Li = styled.li`
     padding: 0;
 `
 
+// container for metadata
 const Container = styled.div`
     flex-grow: 1;
     display: flex;
@@ -25,42 +32,11 @@ const Container = styled.div`
     overflow: auto;
 `
 
-const Instructions = () => {
-    const convertColor = (hex) => {
-        return '#' + hex.toString(16);
-    }
-
-    return (
-        <Card style={{overflow: 'visible'}}>
-            <Entry>
-                <Title>visuai: how to</Title>
-            </Entry>
-            <Entry>
-                <Info><strong>hover</strong> over a node to display its info below</Info>
-                <Info><strong>click</strong> on a module to open its contents</Info>
-            </Entry>
-            <Entry>
-                <Info><strong>drag</strong> to rotate</Info>
-                <Info><strong>scroll</strong> to zoom</Info>
-            </Entry>
-            <Entry>
-                <InlineInfo>
-                    <Header style={{color: convertColor(C.MODULE_COLOR)}}>purple</Header>
-                    <Info> blocks are op modules</Info>
-                </InlineInfo>
-                <InlineInfo>
-                    <Header style={{color: convertColor(C.INPUT_COLOR)}}>blue</Header>
-                    <Info> blocks are i/o nodes</Info>
-                </InlineInfo>
-                <InlineInfo>
-                    <Header style={{color: convertColor(C.NODE_COLOR)}}>gray</Header>
-                    <Info> blocks are op nodes</Info>
-                </InlineInfo>
-            </Entry>
-        </Card>
-    )
-}
-
+/**
+ * returns cards containing metadata and `visuai: how to` instructions
+ *
+ * @param {*} props passed from Sidebar
+ */
 const Metadata = (props) => {
     const getShapes = (key, label) => {
         // make sure this node has a shapes
@@ -141,6 +117,7 @@ const Metadata = (props) => {
 
     let meta = <></>;
     if (props.meta !== null) {
+        // all nodes have name and op
         meta = [
             <Entry key='name'>
                 <Header>name</Header>
@@ -152,6 +129,7 @@ const Metadata = (props) => {
             </Entry>
         ];
 
+        // input and param nodes don't show anything about inputs
         if (props.type !== C.INPUT_TYPE && props.meta.op !== C.PARAM_NODE_OP) {
             meta.push(
                 <Entry key='inputs'>
@@ -162,19 +140,23 @@ const Metadata = (props) => {
                 </Entry>
             );
         }
-        if (props.type !== C.OUTPUT_TYPE && props.meta.op !== C.IO_NODE_OP) {
+
+        // output nodes don't show anything about outputs
+        if (props.type !== C.OUTPUT_TYPE) {
             meta.push(
                 <Entry key='output shapes'>
                     {getShapes('output_shapes', 'output shapes')}
                 </Entry>
             );
         }
+
+        // only modules show params
         if (props.type === C.MODULE_TYPE) {
             meta.push(
                 <Entry key='params'>
                     {getParams()}
                 </Entry>
-            )
+            );
         }
 
         meta = <Card>{meta}</Card>;
@@ -185,7 +167,7 @@ const Metadata = (props) => {
             <Instructions />
             {meta}
         </Container>
-    )
+    );
 }
 
 export default Metadata;

@@ -1,5 +1,5 @@
 /**
- * @file component to enable mouse controls
+ * @file component to enable mouse controls on canvas
  * @author Vincent Liu
  */
 
@@ -12,6 +12,8 @@ extend({ OrbitControls });
 
 /**
  * component for camera orbitcontrols for three.js
+ * 
+ * @param {*} props passed from Topology
  */
 const Controls = (props) => {
     const controls = useRef();
@@ -20,10 +22,7 @@ const Controls = (props) => {
     if (props.position) {
         camera.position.x = 0;
         camera.position.y = 0;
-        camera.position.z = 25;
-        scene.rotation.x = 0;
-        scene.rotation.y = 0;
-        scene.rotation.z = 0;
+        camera.position.z = props.z;
     }
 
     // update controls / rotation
@@ -43,11 +42,11 @@ const Controls = (props) => {
             args={[camera, gl.domElement]} 
             enableKeys={true}
             enableDamping={true}
-            enablePan={false}
+            enablePan={true}
             dampingFactor={0.1}
             rotateSpeed={0.75}
             maxPolarAngle={Math.PI * 5/8}
-            minPolarAngle={Math.PI * 1/8} />
+            minPolarAngle={Math.PI * 2/8} />
     )
 }
 

@@ -1,3 +1,8 @@
+/**
+ * @file contains styled div components
+ * @author Vincent Liu
+ */
+
 import styled from 'styled-components';
 
 

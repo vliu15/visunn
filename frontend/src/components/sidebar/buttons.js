@@ -1,7 +1,13 @@
+/**
+ * @file contains button parts and button compnent
+ * @author Vincent Liu
+ */
+
 import React from 'react';
 import styled from 'styled-components';
 
 
+// clickable button
 const ActiveButton = styled.button`
     width: auto;
     height: auto;
@@ -19,6 +25,7 @@ const ActiveButton = styled.button`
     }
 `
 
+// unclickable button
 const InactiveButton = styled.button`
     width: auto;
     height: auto;
@@ -31,6 +38,7 @@ const InactiveButton = styled.button`
     margin: 1em;
 `
 
+// container for buttons
 const Container = styled.div`
     display: flex;
     flex-direction: row;
@@ -40,6 +48,11 @@ const Container = styled.div`
     margin-bottom: 1em;
 `
 
+/**
+ * returns a div of buttons for controlling canvas actions
+ *
+ * @param {*} props passed from Sidebar
+ */
 const Buttons = (props) => {
     return (
         <Container>
@@ -57,7 +70,7 @@ const Buttons = (props) => {
                 reset <br />position
             </ActiveButton>
         </Container>
-    )
+    );
 }
 
-export default Buttons
+export default Buttons;

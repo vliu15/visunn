@@ -12,10 +12,7 @@ import * as C from '../../constants';
 /**
  * returns a mesh component corresponding to a node to be drawn on the canvas
  * 
- * @param {string} props.type value indicating the type of node
- * @param {Array} props.coords an array of (x,y) coordinates
- * @param {string} props.name name of the module this node corresponds to
- * @param {Object} props.meta mapping of {name, op, input, attr} to its values
+ * @param {*} props props passed from Nodes
  */
 const Node = (props) => {
     const [x, y] = props.coords;
@@ -93,10 +90,7 @@ const Node = (props) => {
 /**
  * returns a list of meshes (nodes) to draw on the canvas
  * 
- * @param {Array} props.inputs list of input node names
- * @param {Array} props.outputs list of output node names
- * @param {Object} props.coords mapping of name to (x,y) coordinates
- * @param {Object} props.meta mapping of name to metadata Object
+ * @param {*} props passed from Topology
  */
 const Nodes = (props) => {
     const type = (name) => {

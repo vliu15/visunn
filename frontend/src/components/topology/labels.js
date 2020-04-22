@@ -10,7 +10,7 @@ import { Dom, useThree } from 'react-three-fiber';
 import { Info } from '../text';
 
 
-// metadata container
+// label container
 const Container = styled.div`
     text-align: left;
     white-space: pre;
@@ -23,11 +23,7 @@ const Container = styled.div`
 /**
  * returns a dom element of metadata label
  * 
- * @param {int} props.x x coordinate of label
- * @param {int} props.y y coordinate of label
- * @param {bool} props.showShapes whether this label should display i/o shapes
- * @param {bool} props.showParams whether this label should display parameters
- * @param {Object} props.meta contains metadata {name, op, (input)}
+ * @param {*} props passed from Node
  */
 const Label = (props) => {
     const formatName = () => {
@@ -64,7 +60,7 @@ const Label = (props) => {
                 {formatName()}
             </Container>
         </Dom>
-    )
+    );
 }
 
 export default Label;
