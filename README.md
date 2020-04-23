@@ -21,22 +21,22 @@ visu = Visu(model, dataloader, logdir='logs', name='resnet152')
 ```bash
 visu -l logs -n resnet152 -p 5000
 ```
-### To build from source
+### To use source
 1. Build
 ```bash
 sh setup.sh
 ```
 2. Initialize
 ```bash
-python -m samples.train -l logs -n resnet152
+python samples/train.py -l logs -n resnet152
 ```
 3. Launch web app
 ```
-python -m samples.serve -l logs -n resnet152 -p 5000
+python samples/serve.py -l logs -n resnet152 -p 5000
 ```
 
 ## Metrics
-Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python -m samples.debug`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
+Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python samples/debug`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
  > Step 1 is the largest bottlenecks in the algorithm.
 1. Convert model to protobuf (built in Pytorch function)
 2. Convert protobuf to dict
