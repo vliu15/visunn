@@ -3,8 +3,6 @@
 ''' visunn: aesthetic visualization of neural networks '''
 
 from setuptools import setup, find_packages
-from glob import glob
-import os
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -37,7 +35,7 @@ CONSOLE_SCRIPTS = [
     'visu = visunn.main:run_main'
 ]
 
-VERSION = '0.0.10'
+VERSION = '0.0.11'
 
 setup(
     name='visunn',
