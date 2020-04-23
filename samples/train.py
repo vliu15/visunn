@@ -105,12 +105,13 @@ def main(args):
 
     # set up dataloader
     download = False
-    if not os.path.exists('cifar10'):
-        os.makedirs('cifar10')
+    cifar_dir = os.path.join(DATA_DIR, 'cifar10')
+    if not os.path.exists(cifar_dir):
+        os.makedirs(cifar_dir)
         download = True
     train_data = DataLoader(
         datasets.CIFAR10(
-            os.path.join(DATA_DIR, 'cifar10'),
+            cifar_dir,
             download=True,
             train=True,
             transform=transforms.ToTensor()
@@ -123,7 +124,7 @@ def main(args):
     # train and save best model
     test_data = DataLoader(
         datasets.CIFAR10(
-            os.path.join(DATA_DIR, 'cifar10'),
+            cifar_dir,
             download=True,
             train=True,
             transform=transforms.ToTensor()

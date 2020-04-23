@@ -30,7 +30,6 @@ class App(object):
         @app.route('/', defaults={'path': ''})
         @app.route('/<path:path>')
         def serve(path):
-            print(path)
             if path != '' and os.path.exists(app.static_folder + '/' + path):
                 return send_from_directory(app.static_folder, path)
             else:

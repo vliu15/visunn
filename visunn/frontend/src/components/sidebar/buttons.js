@@ -18,10 +18,14 @@ const ActiveButton = styled.button`
     color: #FFFFFF;
     font-weight: 600;
     margin: 1em;
+    outline: 0;
     &:hover {
         color: #000000;
         background-color: #DFF9FB;
         cursor: pointer;
+    }
+    &:focus {
+        outline: 0;
     }
 `
 
@@ -36,6 +40,10 @@ const InactiveButton = styled.button`
     color: #FFFFFF;
     font-weight: 600;
     margin: 1em;
+    outline: 0;
+    &:focus {
+        outline: 0;
+    }
 `
 
 // container for buttons
