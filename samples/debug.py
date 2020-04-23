@@ -14,9 +14,9 @@ from torchvision import datasets, transforms
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from models import torch_models
-from constants import DATA_DIR
-from visuai.plot import plot
-from visuai.util import proto_to_dict, process_nodes, process_modules, \
+from visunn.constants import DATA_DIR
+from visunn.plot import plot
+from visunn.util import proto_to_dict, process_nodes, process_modules, \
                         build_modu
 
 __author__ = 'Vincent Liu'

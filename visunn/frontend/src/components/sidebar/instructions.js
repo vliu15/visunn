@@ -1,5 +1,5 @@
 /**
- * @file contains card for visuai instructions
+ * @file contains card for visunn instructions
  * @author Vincent Liu
  */
 
@@ -11,7 +11,7 @@ import * as C from '../../constants';
 
 
 /**
- * returns card component with `visuai: how to` instructions
+ * returns card component with `visunn: how to` instructions
  */
 const Instructions = () => {
     const convertColor = (hex) => {
@@ -21,7 +21,7 @@ const Instructions = () => {
     return (
         <Card style={{overflow: 'visible'}}>
             <Entry>
-                <Title><strong>visuai</strong>: how to</Title>
+                <Title><strong>visunn</strong>: how to</Title>
             </Entry>
             <Entry>
                 <Info><strong>hover</strong> over a node to display its info below</Info>

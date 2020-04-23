@@ -33,7 +33,7 @@ const VincentJianLiu = () => {
             <div style={{display: 'flex', whiteSpace: 'pre'}}>
                 <Link href='mailto:vliu15@stanford.edu'>email</Link>
                 <Info> <strong>|</strong> </Info>
-                <Link href='https://www.github.com/vliu15/visuai'>github</Link>
+                <Link href='https://www.github.com/vliu15/visunn'>github</Link>
             </div>
         </Container>
     );

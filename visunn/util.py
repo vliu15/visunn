@@ -6,8 +6,8 @@ import re
 from copy import copy
 from google.protobuf.json_format import MessageToDict
 
-from visuai.modu import Modu
-from constants import MODU_ROOT
+from visunn.modu import Modu
+from visunn.constants import MODU_ROOT
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'

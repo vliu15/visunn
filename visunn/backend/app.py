@@ -7,8 +7,8 @@ import pickle
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
-from constants import MODU_EXT
-from backend.routes import api
+from visunn.constants import MODU_EXT
+from visunn.backend.routes import api
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -17,7 +17,7 @@ __all__ = ['App']
 
 
 class App(object):
-    def __init__(self, logdir, name, port):
+    def __init__(self, logdir, name):
         app = Flask(__name__, static_folder='../frontend/build')
         app.config.update(dict(debug=True))
         CORS(app)
@@ -36,12 +36,9 @@ class App(object):
                 return send_from_directory(app.static_folder, 'index.html')
 
         # register blueprint routings
-        app.register_blueprint(
-            api(self._modu), url_prefix='/api'
-        )
-
-        self._port = port
+        app.register_blueprint(api(self._modu), url_prefix='/api')
         self._app = app
 
-    def run(self):
-        self._app.run(use_reloader=True, port=self._port, threaded=True)
+    @property
+    def app(self):
+        return self._app

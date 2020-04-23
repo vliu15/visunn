@@ -4,7 +4,7 @@
 
 from copy import deepcopy
 
-from constants import MODU_ROOT
+from visunn.constants import MODU_ROOT
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'

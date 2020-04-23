@@ -1,11 +1,11 @@
-## APIs
-Visuai can be interpreted as 2 separate APIs. Note that all APIs are currently only compatible with Pytorch (`torch==1.4.0`). The following examples will use the `ThreeLayerMLP` model that can be found in `models/three_layer_mlp.py`.
+## Visunn
+Visunn can be interpreted as 2 separate APIs. Note that all APIs are currently only compatible with Pytorch (`torch==1.4.0`).
 
 ### User API: `Visu`
 `Visu` is the API that users can use to log important information (that will later be served to the web app) and is designed to integrate easily with existing scripts with only a couple changes in code. Internally, `Visu` converts the model to GraphDef proto format, prunes unnecessarry nodes, and modularizes the topology. Currently,
 ```python
 # Initialize Visu object with model
-visu = Visu(model, dataloader, logdir='test')
+visu = Visu(model, dataloader, logdir='test', name='model')
 # Log training: not implemented
 visu.update(iteration, optimizer, loss)
 ```
@@ -16,5 +16,5 @@ visu.update(iteration, optimizer, loss)
 # Initialize Modu object with GraphDef proto
 modu = Modu(proto, root='/')
 # Retrieve GraphDef proto for a specified module name
-mod_proto = modu.export('ThreeLayerMLP/Sequential[layers]')
+mod_proto = modu.export('specified/module/name')
 ```

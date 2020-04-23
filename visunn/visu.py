@@ -6,10 +6,10 @@ import os
 import pickle
 from torch.utils.tensorboard._pytorch_graph import graph
 
-from constants import LOG_DIR, MODU_EXT
-from visuai.util import proto_to_dict, process_nodes, process_modules, \
+from visunn.constants import LOG_DIR, MODU_EXT
+from visunn.util import proto_to_dict, process_nodes, process_modules, \
                         build_modu
-from visuai.modu import Modu
+from visunn.modu import Modu
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'

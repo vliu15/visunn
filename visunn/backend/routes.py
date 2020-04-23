@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 ''' contains blueprint routing for flask app '''
 
-from pprint import pprint
 from flask import Blueprint, jsonify
 
-from visuai.plot import plot
+from visunn.plot import plot
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'

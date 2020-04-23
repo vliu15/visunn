@@ -33,7 +33,7 @@ const Container = styled.div`
 `
 
 /**
- * returns cards containing metadata and `visuai: how to` instructions
+ * returns cards containing metadata and `visunn: how to` instructions
  *
  * @param {*} props passed from Sidebar
  */
