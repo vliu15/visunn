@@ -4,7 +4,7 @@
 
 import argparse
 
-from visunn.backend.app import App
+from visunn import App
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'

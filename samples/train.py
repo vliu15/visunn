@@ -12,8 +12,7 @@ from tqdm import tqdm
 from copy import deepcopy
 
 from models import torch_models
-from visunn.constants import DATA_DIR, LOG_DIR
-from visunn.visu import Visu
+from visunn import Visu, DATA_DIR, LOG_DIR
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'

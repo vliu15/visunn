@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ''' visunn: aesthetic visualization of neural networks '''
+
 from setuptools import setup, find_packages
+from glob import glob
+import os
+
+__author__ = 'Vincent Liu'
+__email__ = 'vliu15@stanford.edu'
 
 
 README_md = ''
-with open('README.md', r) as f:
+with open('README.md', 'r') as f:
     README_md = f.read()
 
 REQUIRED_PACKAGES = [
@@ -31,11 +37,13 @@ CONSOLE_SCRIPTS = [
     'visu = visunn.main:run_main'
 ]
 
+VERSION = '0.0.10'
+
 setup(
-    name='visu-neural-networks',
-    version='0.0.1',
+    name='visunn',
+    version=VERSION,
     author='Vincent Liu',
-    author_email='vliu15@stanford.edu'
+    author_email='vliu15@stanford.edu',
     description=__doc__,
     long_description=README_md,
     long_description_content_type='text/markdown',
@@ -46,9 +54,7 @@ setup(
     entry_points={
         'console_scripts': CONSOLE_SCRIPTS
     },
-    package_data={
-        'visunn': ['frontend/build/*', '*.txt', '*.md']
-    },
+    include_package_data=True,
     classifiers=[
         'Intended Audience :: Developers',
         'Intended Audience :: Education',

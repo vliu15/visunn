@@ -7,8 +7,8 @@ import pickle
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
-from visunn.constants import MODU_EXT
 from visunn.backend.routes import api
+from visunn.constants import MODU_EXT
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -30,6 +30,7 @@ class App(object):
         @app.route('/', defaults={'path': ''})
         @app.route('/<path:path>')
         def serve(path):
+            print(path)
             if path != '' and os.path.exists(app.static_folder + '/' + path):
                 return send_from_directory(app.static_folder, path)
             else:

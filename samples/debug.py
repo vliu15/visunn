@@ -14,10 +14,8 @@ from torchvision import datasets, transforms
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from models import torch_models
-from visunn.constants import DATA_DIR
-from visunn.plot import plot
-from visunn.util import proto_to_dict, process_nodes, process_modules, \
-                        build_modu
+from visunn import DATA_DIR, plot, proto_to_dict, process_nodes,\
+                   process_modules, build_modu 
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
