@@ -9,12 +9,3 @@ protobuf>=3.11.3
 flask>=1.1.1
 flask-cors>=3.0.8
 gevent>=20.4.0
-
-# debugging
-matplotlib>=3.2.0
-pympler>=0.8
-
-# pytorch models
-torchvision>=0.5.0
-tqdm>=4.43.0
-scipy>=1.4.1

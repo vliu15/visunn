@@ -1,29 +1,42 @@
-# Visuai: Aesthetic and Informative Visualizations of Neural Networks
-Visuai is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures.
+# Visunn: Aesthetic Visualizations of Neural Networks for Deep Learning
+Visunn is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures.
 
 ## Setup
-To be compatible with libraries such as Pytorch, the Visuai backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `frontend/package.json`).
-
-Support for containerized deployment with Docker is still in progress. Visuai will hopefully become a Python package so as to hide all dependencies from users and facilitate usage.
+To be compatible with libraries such as Pytorch, the Visunn backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `visunn/frontend/package.json`).
 
 ## Usage
-1. Integrate into native code
-```python
-# Import
-from visuai import Visu
-# Initialize
-visu = Visu(model, dataloader, logdir='logs', name='model')
-```
-2. Launch web app
+The following examples will use the model `torchvision.models.resnet152`.
+
+### To pip install
+1. Install python package
 ```bash
-# Launch backend
-python run.py -l sample
-# Launch frontend
-cd frontend && npm start
+pip install visunn
+```
+2. Integrate into native code
+```python
+from visunn import Visu
+visu = Visu(model, dataloader, logdir='logs', name='resnet152')
+```
+3. Launch web app
+```bash
+visu -l logs -n resnet152 -p 5000
+```
+### To build from source
+1. Build
+```bash
+sh setup.sh
+```
+2. Initialize
+```bash
+python -m samples.train -l logs -n resnet152
+```
+3. Launch web app
+```
+python -m samples.serve -l logs -n resnet152 -p 5000
 ```
 
 ## Metrics
-Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
+Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python -m samples.debug`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
  > Step 1 is the largest bottlenecks in the algorithm.
 1. Convert model to protobuf (built in Pytorch function)
 2. Convert protobuf to dict

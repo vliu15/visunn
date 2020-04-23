@@ -1,5 +1,5 @@
-from models.three_layer_conv_net import ThreeLayerConvNet
-from models.three_layer_mlp import ThreeLayerMLP
+from .three_layer_conv_net import ThreeLayerConvNet
+from .three_layer_mlp import ThreeLayerMLP
 from torchvision.models import \
     vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19, vgg19_bn, \
     resnet18, resnet34, resnet50, resnet101, resnet152, \
