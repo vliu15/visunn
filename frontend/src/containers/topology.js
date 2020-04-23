@@ -27,11 +27,11 @@ const Container = styled.div`
  * @param {Object} props.config config data from backend
  */
 const Topology = (props) => {
-    const z = 3 * Object.keys(props.config.meta).length;
+    let z = 3 * Object.keys(props.config.meta).length;
     return (
         <Container>
             <Canvas
-                camera={{position: [0, 0, z]}}
+                camera={{position: [0, 0, props.zoom]}}
                 gl={{physicallyCorrectLights: true}}>
                 <ambientLight intensity={0.75} />
                 <pointLight position={[0, 0, 5000]} intensity={0.9} castShadow={true} />
@@ -48,7 +48,8 @@ const Topology = (props) => {
                     coords={props.config.coords}
                     inputs={props.config.inputs}
                     outputs={props.config.outputs}
-                    setName={props.setName} />
+                    setName={props.setName}
+                    setTag={props.setTag} />
                 <Edges
                     key={'edges'}
                     coords={props.config.coords}

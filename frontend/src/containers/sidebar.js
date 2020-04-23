@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 import Buttons from '../components/sidebar/buttons';
 import Metadata from '../components/sidebar/metadata';
+import { ROOT } from '../constants';
 
 
 // sidebar container
@@ -39,9 +40,8 @@ const Sidebar = (props) => {
 
         if (previousModule !== null) {
             previousModule.onclick = () => {
-                let path = window.location.pathname;
-                path = path.substring(0, path.lastIndexOf('/'));
-                window.location.pathname = path;
+                let newTag = props.tag.substring(0, props.tag.lastIndexOf(';'));
+                props.setTag(newTag);
                 return true;
             }
         }
@@ -54,9 +54,7 @@ const Sidebar = (props) => {
             return true;
         }
         rootModule.onclick = () => {
-            let host = window.location.hostname;
-            let port = window.location.port
-            window.location.href = 'http://' + host + ':' + port + '/';
+            props.setTag(ROOT);
         }
     });
 

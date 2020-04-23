@@ -10,15 +10,15 @@ from visuai.plot import plot
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
 
-__all__ = ['topology_blueprint']
+__all__ = ['api']
 
 
-def topology_blueprint(modu):
+def api(modu):
     ''' creates routing for the topology feature
 
         modu  (Modu) : modu object
     '''
-    blueprint = Blueprint('topology', __name__)
+    blueprint = Blueprint('api', __name__)
 
     @blueprint.route('/<tag>', methods=['GET'])
     def topology(tag):

@@ -1,2 +1,2 @@
-from backend.routes import topology_blueprint
+from backend.routes import api
 from backend.app import App

@@ -11,7 +11,6 @@ import Sidebar from './containers/sidebar';
 import Topology from './containers/topology';
 import VincentJianLiu from './containers/vincentjianliu';
 import * as C from './constants';
-import { ROOT } from './constants';
 
 
 export const AppContainer = styled.div`
@@ -23,24 +22,26 @@ export const AppContainer = styled.div`
 `
 
 const App = () => {
+    let [tag, setTag] = useState(C.ROOT);
+    let [ready, setReady] = useState(false);
+    let [config, setConfig] = useState({});
+    let [rotation, setRotation] = useState(true);
+    let [position, setPosition] = useState(true);
+    let [name, setName] = useState(null);
+
     // retrieve the metadata corresponding to tag
     useEffect(() => {
         const getConfig = async () => {
-            let tag = window.location.pathname;
-            if (tag === '/') {
-                tag += ROOT;
-            } else {
-                tag = '/' + tag.slice(1).replace(/\//g, ';');
-            }
-
-            let config = await fetch('http://127.0.0.1:5000/topology' + tag);
+            let config = await fetch('/api/' + tag);
             let json = await config.json();
             setConfig(json);
+            setRotation(true);
+            setPosition(true);
             setReady(true);
         }
 
         getConfig();
-    }, []);
+    }, [tag]);
 
     // add event listeners
     useEffect(() => {
@@ -70,27 +71,24 @@ const App = () => {
         }
     }
 
-    let [ready, setReady] = useState(false);
-    let [config, setConfig] = useState({});
-    let [rotation, setRotation] = useState(true);
-    let [position, setPosition] = useState(false);
-    let [name, setName] = useState(null);
-
     return (
         <div className='App'>
             <AppContainer>
                 <Sidebar
-                    hasPrevious={window.location.pathname !== '/'}
+                    hasPrevious={tag !== C.ROOT}
                     setRotation={setRotation}
                     setPosition={setPosition}
-                    meta={(ready && name !== null) ? config.meta[name] : null}
+                    tag={tag}
+                    setTag={setTag}
+                    meta={(ready && (name in config.meta)) ? config.meta[name] : null}
                     type={(type(name))} />
                 {ready
                     ? <Topology
                         rotation={rotation}
                         position={position}
                         config={config}
-                        setName={setName} />
+                        setName={setName}
+                        setTag={setTag} />
                     : <></>}
                 <VincentJianLiu />
             </AppContainer>

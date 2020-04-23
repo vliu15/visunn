@@ -29,15 +29,13 @@ const Node = (props) => {
                     : [C.NODE_COLOR, C.NODE_HOVER_COLOR, C.NODE_SIZE]
     );
 
-    const onClick = () => {
+    const onPointerUp = () => {
         // only modules should have clickable actions
         if (props.type !== C.MODULE_TYPE) {
             return false;
         }
-        let host = window.location.hostname;
-        let port = window.location.port;
-        let href = 'http://' + host + ':' + port + '/' + props.name.slice(0, -1);
-        window.location.href = href;
+        props.setTag(props.name.replace(/\//g, ';').slice(0, -1));
+        document.body.style.cursor = 'default';
         return true;
     }
 
@@ -71,7 +69,8 @@ const Node = (props) => {
                 position={[x, y, 0]}
                 rotation={[0, 0, 0]}
                 receiveShadow={true}
-                onClick={onClick}
+                // onPointerDown={onPointerDown}
+                onPointerUp={onPointerUp}
                 onPointerOver={onPointerOver}
                 onPointerOut={onPointerOut}>
                 <boxGeometry
@@ -113,7 +112,8 @@ const Nodes = (props) => {
                 meta={props.meta[name]}
                 coords={props.coords[name]}
                 type={type(name)}
-                setName={props.setName} />
+                setName={props.setName}
+                setTag={props.setTag} />
     );
     return nodes;
 }
