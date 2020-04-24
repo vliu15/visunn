@@ -35,7 +35,7 @@ CONSOLE_SCRIPTS = [
     'visu = visunn.main:run_main'
 ]
 
-VERSION = '0.0.11'
+VERSION = '0.1.0'
 
 setup(
     name='visunn',

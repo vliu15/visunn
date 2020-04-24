@@ -1,42 +1,42 @@
 # Visunn: Aesthetic Visualizations of Neural Networks for Deep Learning
-Visunn is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures.
+Visunn is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures. Currently, `torch>=1.4.0` backend is supported.
 
 ## Setup
-To be compatible with libraries such as Pytorch, the Visunn backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `visunn/frontend/package.json`).
+The backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `visunn/frontend/package.json`).
 
 ## Usage
-The following examples will use the model `torchvision.models.resnet152`.
+The following examples will use the model `models/ThreeLayerMLP`.
 
 ### To pip install
 1. Install python package
 ```bash
 pip install visunn
 ```
-2. Integrate into native code
+2. Initialize `Visu` in Python script
 ```python
 from visunn import Visu
-visu = Visu(model, dataloader, logdir='logs', name='resnet152')
+visu = Visu(model, dataloader, logdir='logs', name='ThreeLayerMLP')
 ```
 3. Launch web app
 ```bash
-visu -l logs -n resnet152 -p 5000
+visu -l logs -n ThreeLayerMLP -p 5000
 ```
 ### To use source
-1. Build
+1. Build frontend (requires `npm`)
 ```bash
-sh setup.sh
+sh build.sh
 ```
-2. Initialize
+2. Initialize `Visu`
 ```bash
-python samples/train.py -l logs -n resnet152
+python samples/train.py -l logs -n ThreeLayerMLP
 ```
 3. Launch web app
 ```
-python samples/serve.py -l logs -n resnet152 -p 5000
+python samples/serve.py -l logs -n ThreeLayerMLP -p 5000
 ```
 
 ## Metrics
-Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python samples/debug`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
+Below are time and space metrics for a few sample models, averaged over 5 runs. These can be obtained by running `python samples/debug.py`, which prints metrics of the 5 steps required to create a modularized topology (run on CIFAR-10):
  > Step 1 is the largest bottlenecks in the algorithm.
 1. Convert model to protobuf (built in Pytorch function)
 2. Convert protobuf to dict
@@ -85,4 +85,4 @@ class Model(nn.Module):
 Note how `self.relu = nn.ReLU()` is reused multiple times. While this is not incorrect in any way. However, from a graph perspective, there is one `self.relu = ReLU()` node, which has multiple input and output nodes. Rendering this topology declaration will show cycles in the graph due to the multiple passes through the recycled node. A potential solution would be to split all nodes that consist of >1 unconnected graph.
 
 ### Weights and Biases
-With how `torch==1.4.0` constructs the graph protobuf, it is not possible to acquire the `_output_shapes` attribute from the weights and biases nodes (recoverable for all other nodes). We thus opt to leave those fields empty when aggregating attributes.
+With how `torch>=1.4.0` constructs the graph protobuf, it is not possible to acquire the `_output_shapes` attribute from the weights and biases nodes (recoverable for all other nodes). Those fields empty when aggregating attributes.

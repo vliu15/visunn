@@ -71,7 +71,6 @@ class Modu(object):
                         else:
                             node['output'][idx-delim] = name + sub_name + '/'
 
-
             # discard duplicates from multiple inputs from same module
             node['input'] = list(set(node['input']))
             node['output'] = list(set(node['output']))
@@ -110,7 +109,6 @@ class Modu(object):
                     'params': sorted(submodule['params'])
                 }
                 meta[sub_name] = _fix_links(node)
-
 
         # convert all modules and nodes to dict
         # #####################################################################

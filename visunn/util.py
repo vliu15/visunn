@@ -184,7 +184,7 @@ def process_modules(graphdict):
     # removing the '/' and putting the module in parentheses so that the
     # modularizing code will not identify it as a module
     #
-    # we subtract 2 to get the index to accommodate for
+    # subtract 2 to get the index to accommodate for
     #   (1) len() is 1-indexed, and
     #   (2) modules end in '/', so len() over-counts by 1 position
     # #########################################################################
@@ -287,7 +287,7 @@ def build_modu(graphdict, params=None):
             #   node : a/b/c/d/e
             #   input: a/b/d/e/f
             #
-            # a/b/d/e/f is an input to modules a/b/c/, a/b/c/d/ (vice versa for 
+            # a/b/d/e/f is an input to modules a/b/c/, a/b/c/d/ (vice versa for
             # outputs)
             # #################################################################
             is_link = False
