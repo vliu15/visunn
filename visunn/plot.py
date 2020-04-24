@@ -15,16 +15,16 @@ def _rescale_to_gaussian(xs, ys, v=7.5):
     xmean = np.mean(xs)
     xstd = np.std(xs)
     if xstd < 1e-3:
-        xnorm = lambda x: 0
+        def xnorm(x): return 0
     else:
-        xnorm = lambda x: (x - xmean) / xstd * v
+        def xnorm(x): return (x - xmean) / xstd * v
 
     ymean = np.mean(ys)
     ystd = np.std(ys)
     if ystd < 1e-3:
-        ynorm = lambda y: 0
+        def ynorm(y): return 0
     else:
-        ynorm = lambda y: (y - ymean) / ystd * v
+        def ynorm(y): return (y - ymean) / ystd * v
 
     return xnorm, ynorm
 
@@ -63,7 +63,9 @@ def plot(edges, normalize=True, truncate=False):
     # #########################################################################
 
     xs, ys = zip(*pos.values())
-    xnorm, ynorm = _rescale_to_gaussian(list(set(xs)), list(set(ys)), v=len(edges))
+    xnorm, ynorm = _rescale_to_gaussian(
+        list(set(xs)), list(set(ys)), v=len(edges)
+    )
 
     for node, (x, y) in pos.items():
         pos[node] = (xnorm(x), ynorm(y))

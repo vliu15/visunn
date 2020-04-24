@@ -40,8 +40,12 @@ const Sidebar = (props) => {
 
         if (previousModule !== null) {
             previousModule.onclick = () => {
-                let newTag = props.tag.substring(0, props.tag.lastIndexOf(';'));
-                props.setTag(newTag);
+                if (props.tag.includes(';')) {
+                    let newTag = props.tag.substring(0, props.tag.lastIndexOf(';'));
+                    props.setTag(newTag);
+                } else {
+                    props.setTag(ROOT);
+                }
                 return true;
             }
         }

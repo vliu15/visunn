@@ -71,9 +71,9 @@ class Visu(object):
         # tensor basics:
         #   https://pytorch.org/cppdocs/notes/tensor_basics.html
         #
-        # we only want to keep meaningful operations (that are directly relevant
-        # to manipulating the input tensor), which is why we discard all
-        # operations of type 'prim', which are non-tensor operations
+        # only want to keep meaningful operations (that are directly relevant
+        # to manipulating the input tensor), which is why all operations of
+        # type 'prim' (non-tensor operations) are discarded
         # #####################################################################
         graphdict = process_nodes(graphdict)
 
@@ -81,13 +81,13 @@ class Visu(object):
         # #####################################################################
         # some modules only contain one submodule or one node, and such modules
         # are uninteresting and only complicate the hierarchical structure of
-        # topology, so we collapse all modules that fall into this category
+        # topology, all such modules are collapsed
         # #####################################################################
         graphdict = process_modules(graphdict)
 
         # [5] modularize pruned graph topology as a filesystem
         # #####################################################################
-        # we want to retain the modularity of the topology so that it will be
+        # want to retain the modularity of the topology so that it will be
         # easy to interact with and represent as a web app
         # #####################################################################
         self._modu = build_modu(graphdict, params=params)

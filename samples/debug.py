@@ -14,8 +14,8 @@ from torchvision import datasets, transforms
 from torch.utils.tensorboard._pytorch_graph import graph
 
 from models import torch_models
-from visunn import DATA_DIR, plot, proto_to_dict, process_nodes,\
-                   process_modules, build_modu 
+from visunn import DATA_DIR, plot, proto_to_dict, process_nodes, \
+                   process_modules, build_modu
 
 __author__ = 'Vincent Liu'
 __email__ = 'vliu15@stanford.edu'
@@ -26,7 +26,7 @@ def get_model_and_dataloader(name):
     model = torch_models.get(name, None)
     if model is None:
         print('Valid name specifications are {}'
-                .format(', '.join(torch_models.keys())))
+              .format(', '.join(torch_models.keys())))
         raise RuntimeError
     else:
         model = model(num_classes=10)
@@ -165,7 +165,6 @@ def main(args):
                   .format(asizeof.asizeof(plt)))
 
             plt.show()
-            
 
 
 if __name__ == '__main__':

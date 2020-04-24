@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-''' contains simple convet for cifar image classification '''
+''' contains simple convnet for cifar image classification '''
 
 from torch import nn
 
