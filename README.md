@@ -1,7 +1,7 @@
 # Visunn: Aesthetic Visualizations of Neural Networks for Deep Learning
 Visunn is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures. Currently, `torch>=1.4.0` backend is supported.
 
-<img src="files/demo.gif" alt="demo gif" width="500">
+<img src="files/demo.gif" alt="demo gif">
 
 ## Setup
 The backend and user API is in Python (all `pip` dependencies can be found in `requirements.txt`) and serves a frontend consisting of a fusion of React and Three.js (all `npm` dependencies can be found in `visunn/frontend/package.json`).
