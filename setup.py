@@ -35,7 +35,7 @@ CONSOLE_SCRIPTS = [
     'visu = visunn.main:run_main'
 ]
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 setup(
     name='visunn',
@@ -47,7 +47,6 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/vliu15/visunn',
     install_requires=REQUIRED_PACKAGES,
-    test_requires=TEST_PACKAGES,
     packages=find_packages(),
     entry_points={
         'console_scripts': CONSOLE_SCRIPTS

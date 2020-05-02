@@ -1,1 +1,3 @@
-include visunn/frontend/build/**/*
+include visunn/frontend/build/*
+include visunn/frontend/build/static/js/*
+include visunn/frontend/build/static/css/*
