@@ -1,4 +1,6 @@
-# Visunn: Aesthetic Visualizations of Neural Networks for Deep Learning
+## Visunn: Scaling Neural Network Visualization, Aesthetically and Informatively
+Check out my Medium post [here](https://medium.com/@vincentliu_90655/scaling-neural-network-visualization-aesthetically-and-informatively-80c728f57707)!
+
 Visunn is a visualization tool that leverages functional and modular visualizations to provide an visual understanding of neural network architectures. Currently, `torch>=1.4.0` backend is supported.
 
 <img src="files/demo.gif" alt="demo gif">
